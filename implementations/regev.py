@@ -49,12 +49,16 @@ class Regev(ABC):
 
 
     @staticmethod
-    def generate_a(d: int):
+    def generate_a(d: int, N: int):
         a = []
         ind = 0
         num = 2
         while ind < d:
             if is_prime(num):
+                if N % num == 0:
+                    print(f"We are very lucky! Here is p: {num} and q: {N/num}")
+                    num += 1
+                    continue
                 a.append(int(math.pow(num, 2)))
                 ind += 1
             num += 1
@@ -82,7 +86,7 @@ class Regev(ABC):
         # CZĘŚĆ NiP (utworzenie rejestrów)
 
         x_qregs_spec = dict()
-        a = self.generate_a(d)
+        a = self.generate_a(d, N)
 
         # Input registers, each has qd-qubits
         for i in range(d):
@@ -113,12 +117,21 @@ class Regev(ABC):
 
         x_regs_cubits = []
         # for qubit in circuit.qubits:
+        qregs_all = circuit.qregs
+        print(f"\n\nqregs_all: {qregs_all}")
+        print(f"qregs_all[0].qubits: {qregs_all[0]._bits}")
 
         for i in range(d):
+            qubits_to_pass = []
+            qubits_to_pass += qregs_all[i]
+            qubits_to_pass += qregs_all[-2]
+            qubits_to_pass += qregs_all[-1]
+            print(f"\n\nqubits_to_pass: {qubits_to_pass}\n\n")
+
             modular_exponentiation_gate = self._modular_exponentiation_gate(a[i], N, n, qd)
             circuit.append(
                 modular_exponentiation_gate,
-                circuit.qubits
+                qubits_to_pass
             )
 
 

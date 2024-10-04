@@ -9,7 +9,7 @@ from utils.typing_ import QRegsSpec
 
 
 def modular_exponentiation_gate(constant: int, N: int, n: int, qd: int) -> Gate:
-    circuit = create_circuit(modular_exponentiation_gate_regs(qd), f'Exp({constant})_Mod_{N}')
+    circuit = create_circuit(modular_exponentiation_gate_regs(n, qd), f'Exp({constant})_Mod_{N}')
     x_qreg, y_qreg, aux_qreg = circuit.qregs
 
     for i in range(qd):

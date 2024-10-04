@@ -12,8 +12,8 @@ class HanerRegev(Regev):
     def _prefix(self) -> str:
         return 'Haner'
 
-    def _modular_exponentiation_gate(self, constant: int, N: int, n: int) -> Instruction:
-        return modular_exponentiation_gate(constant, N, n)
+    def _modular_exponentiation_gate(self, constant: int, N: int, n: int, qd: int) -> Instruction:
+        return modular_exponentiation_gate(constant, N, n, qd)
 
     def _modular_multiplication_gate(self, constant: int, N: int, n: int) -> Instruction:
         return controlled_modular_multiplication_gate(constant, N, n)
