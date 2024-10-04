@@ -1,0 +1,8 @@
+qiskit==1.0.1
+
+numpy
+scipy
+sympy
+jupyter
+matplotlib
+pylatexenc
