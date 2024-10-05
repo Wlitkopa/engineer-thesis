@@ -82,8 +82,8 @@ class Regev(ABC):
         self._validate_input(N)
 
         n = N.bit_length()
-        d = math.ceil(math.sqrt(n))
-        qd = math.ceil(n/d) + d
+        d = math.floor(math.sqrt(n))
+        qd = math.floor(n/d) + d
 
         print(f"N: {N}\nn: {n}\nd: {d}\nqd: {qd}")
 
@@ -199,7 +199,27 @@ class Regev(ABC):
         return circuit
 
 
-    def _construct_circuit_with_semiclassical_QFT(self, a: int, N: int, n: int, d: int, qd: int) -> QuantumCircuit:
+    def _construct_circuit_with_semiclassical_QFT(self, N: int, n: int, d: int, qd: int) -> QuantumCircuit:
+
+        # CZĘŚĆ NiP (utworzenie rejestrów)
+
+        x_qregs_spec = dict()
+        a = self.generate_a(d, N)
+
+        # Input registers, each has qd-qubits
+        for i in range(d):
+            x_qregs_spec[f'x{i + 1}'] = qd
+        x_qregs = [QuantumRegister(size, name=name) for name, size in x_qregs_spec.items()]
+
+        # Output register, has n qubits (because of mod N)
+        y_qreg = QuantumRegister(n, 'y')
+
+        # Creating quantum circuit
+        aux_qreg = AncillaRegister(self._get_aux_register_size(n), 'aux')
+        circuit = QuantumCircuit(*x_qregs, y_qreg, aux_qreg, name=self._get_name(N, d))
+
+
+
         x_qreg = QuantumRegister(1, 'x')
         y_qreg = QuantumRegister(n, 'y')
         aux_qreg = AncillaRegister(self._get_aux_register_size(n), 'aux')
