@@ -30,6 +30,54 @@ class Regev(ABC):
     def __init__(self,  shots) -> None:
         self.shots= shots
 
+    def get_vector(self, N: int, semi_classical=False) -> 'RegevResult':
+        self._validate_input(N)
+
+        result = RegevResult()
+
+        circuit = self.construct_circuit(N, semi_classical, measurement=True)
+        aersim = AerSimulator()
+        pm = generate_preset_pass_manager(backend=aersim, optimization_level=3)
+        isa_qc = pm.run(circuit)
+
+        counts = aersim.run(isa_qc, shots=self.shots).result().get_counts(0)
+        #  counts = result.get_counts(0)
+        # print('Counts(ideal):', counts)
+
+        # counts=self.sampler().run(circuit, shots=self.shots).result().quasi_dists[0].binary_probabilities()
+
+        result.total_counts = len(counts)
+        result.total_shots = self.shots
+        print(f"counts.items(): {counts.items()}")
+
+        for measurement, shots in counts.items():
+            # measurement = self._parse_measurement(measurement, semi_classical)
+            print(f"measurment: {measurement}   |   shots: {shots}")
+            # order = self._get_order(measurement, a, N)
+            # if order:
+            #     if order == 1:
+            #         logger.info('Skip trivial order.')
+            #         continue
+            #
+            #     if result.order and not result.order == order:
+            #         logger.error(f'Currently computed order {order} differs from already stored: {result.order}.')
+            #         continue
+
+                # result.order = order
+
+            result.successful_counts += 1
+            result.successful_shots += shots
+
+        return result
+
+
+    @staticmethod
+    def _parse_measurement(measurement: str, semi_classical=False):
+        if semi_classical:
+            measurement = measurement.replace(' ', '')
+        return int(measurement, base=2)
+
+
     def construct_circuit(self, N: int, semi_classical: bool = False, measurement: bool = True):
         self._validate_input(N)
 
@@ -111,22 +159,22 @@ class Regev(ABC):
         print(f"a: {a}\n\n")
         # print(f"circuit.qubits: {circuit.qubits}")
 
-        for qubit in circuit.qubits:
-            print(f"qubit: {qubit._repr}\nregister: {qubit._register}\nregister_name: {qubit._register._name}")
+        # for qubit in circuit.qubits:
+        #     print(f"qubit: {qubit._repr}\nregister: {qubit._register}\nregister_name: {qubit._register._name}")
         # Koniec debuggingu
 
         x_regs_cubits = []
         # for qubit in circuit.qubits:
         qregs_all = circuit.qregs
-        print(f"\n\nqregs_all: {qregs_all}")
-        print(f"qregs_all[0].qubits: {qregs_all[0]._bits}")
+        # print(f"\n\nqregs_all: {qregs_all}")
+        # print(f"qregs_all[0].qubits: {qregs_all[0]._bits}")
 
         for i in range(d):
             qubits_to_pass = []
             qubits_to_pass += qregs_all[i]
             qubits_to_pass += qregs_all[-2]
             qubits_to_pass += qregs_all[-1]
-            print(f"\n\nqubits_to_pass: {qubits_to_pass}\n\n")
+            # print(f"\nqubits_to_pass: {qubits_to_pass}\na_to_pass: {a[i]}\n")
 
             modular_exponentiation_gate = self._modular_exponentiation_gate(a[i], N, n, qd)
             circuit.append(
@@ -134,18 +182,19 @@ class Regev(ABC):
                 qubits_to_pass
             )
 
+        qft = QFT(qd).to_gate()
 
-        #
-        # iqft = QFT(len(x_qreg)).inverse().to_gate()
-        # circuit.append(
-        #     iqft,
-        #     x_qreg
-        # )
-        #
-        # if measurement:
-        #     x_creg = ClassicalRegister(2 * n, name='xValue')
-        #     circuit.add_register(x_creg)
-        #     circuit.measure(x_qreg, x_creg)
+        for i in range(d):
+            circuit.append(
+                qft,
+                qregs_all[i]
+        )
+
+        if measurement:
+            for i in range(d):
+                x_creg = ClassicalRegister(qd, name=f'x{i+1}Value')
+                circuit.add_register(x_creg)
+                circuit.measure(qregs_all[i], x_creg)
 
         return circuit
 
@@ -207,4 +256,56 @@ class Regev(ABC):
     @abstractmethod
     def _modular_multiplication_gate(self, constant: int, N: int, n: int) -> Instruction:
         raise NotImplemented
+
+
+
+class RegevResult():
+
+    def __init__(self) -> None:
+        self._order = None
+        self._total_counts = 0
+        self._successful_counts = 0
+        self._total_shots = 0
+        self._successful_shots = 0
+
+    @property
+    def order(self) -> Optional[int]:
+        return self._order
+
+    @order.setter
+    def order(self, value: int) -> None:
+        self._order = value
+
+    @property
+    def total_counts(self) -> int:
+        return self._total_counts
+
+    @total_counts.setter
+    def total_counts(self, value: int) -> None:
+        self._total_counts = value
+
+    @property
+    def successful_counts(self) -> int:
+        return self._successful_counts
+
+    @successful_counts.setter
+    def successful_counts(self, value: int) -> None:
+        self._successful_counts = value
+
+    @property
+    def total_shots(self) -> int:
+        return self._total_shots
+
+    @total_shots.setter
+    def total_shots(self, value: int) -> None:
+        self._total_shots = value
+
+    @property
+    def successful_shots(self) -> int:
+        return self._successful_shots
+
+    @successful_shots.setter
+    def successful_shots(self, value: int) -> None:
+        self._successful_shots = value
+
 
