@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 class Regev(ABC):
 
     def __init__(self,  shots) -> None:
-        self.shots= shots
+        self.shots = shots
 
     def get_vector(self, N: int, semi_classical=False) -> 'RegevResult':
         self._validate_input(N)
@@ -52,7 +52,7 @@ class Regev(ABC):
 
         for measurement, shots in counts.items():
             # measurement = self._parse_measurement(measurement, semi_classical)
-            print(f"measurment: {measurement}   |   shots: {shots}")
+            print(f", measurment: {measurement}   |   shots: {shots}", end="")
             # order = self._get_order(measurement, a, N)
             # if order:
             #     if order == 1:
@@ -82,7 +82,7 @@ class Regev(ABC):
         self._validate_input(N)
 
         n = N.bit_length()
-        d = math.floor(math.sqrt(n))
+        d = math.ceil(math.sqrt(n))
         qd = math.floor(n/d) + d
 
         print(f"N: {N}\nn: {n}\nd: {d}\nqd: {qd}")
@@ -104,7 +104,7 @@ class Regev(ABC):
         while ind < d:
             if is_prime(num):
                 if N % num == 0:
-                    print(f"We are very lucky! Here is p: {num} and q: {N/num}")
+                    print(f"We are very lucky! Here is p: {num} and q: {N//num}")
                     num += 1
                     continue
                 a.append(int(math.pow(num, 2)))
@@ -261,7 +261,7 @@ class Regev(ABC):
     def _get_aux_register_size(self, n: int) -> int:
         raise NotImplemented
 
-    def _get_name(self, d: int, N: int) -> str:
+    def _get_name(self, N: int, d: int) -> str:
         return f'{self._prefix} Regev(N={N}, d={d})'
 
     @property
