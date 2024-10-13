@@ -93,9 +93,9 @@ class Regev(ABC):
             d = math.floor(math.sqrt(n))
 
         if qd_ceil:
-            qd = math.ceil(math.sqrt(n))
+            qd = math.ceil(math.sqrt(n)) + d
         else:
-            qd = math.floor(math.sqrt(n))
+            qd = math.floor(math.sqrt(n)) + d
 
         # print(f"N: {N}\nn: {n}\nd: {d}\nqd: {qd}")
         self.result.N = N

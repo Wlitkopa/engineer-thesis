@@ -4,7 +4,7 @@ from utils.convert_to_matrix_row import convert_to_matrix_row
 from utils.convert_milliseconds import convert_milliseconds
 import time
 
-Ns = [15, 21, 33, 35, 39, 55, 65, 77]
+Ns = [15, 21, 33, 35, 39, 55, 65, 77, 143]
 # Ns = [15, 21, 33]
 
 d_ceil_bool = True
