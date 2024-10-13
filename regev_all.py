@@ -7,7 +7,7 @@ import time
 Ns = [15, 21, 33, 35, 39, 55, 65, 77, 143]
 # Ns = [15, 21, 33]
 
-d_ceil_bool = True
+d_ceil_bool = False
 qd_ceil_bool = False
 
 for i in range(len(Ns)):
@@ -48,7 +48,6 @@ for i in range(len(Ns)):
     file.write(result_str)
     file.close()
 
-    print("\n\n")
     print(f"N: {result.N}")
     print(f"n: {result.n}")
     print(f"d_ceil: {result.d_ceil}")

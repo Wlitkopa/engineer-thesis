@@ -93,9 +93,9 @@ class Regev(ABC):
             d = math.floor(math.sqrt(n))
 
         if qd_ceil:
-            qd = math.ceil(math.sqrt(n)) + d
+            qd = math.ceil(n/d) + d
         else:
-            qd = math.floor(math.sqrt(n)) + d
+            qd = math.floor(n/d) + d
 
         # print(f"N: {N}\nn: {n}\nd: {d}\nqd: {qd}")
         self.result.N = N
@@ -174,7 +174,7 @@ class Regev(ABC):
         circuit.x(y_qreg[0])
 
         # Debugging
-        print(f"a: {a}\n\n")
+        # print(f"a: {a}\n\n")
         self.result.squared_primes = a
         # print(f"circuit.qubits: {circuit.qubits}")
 
