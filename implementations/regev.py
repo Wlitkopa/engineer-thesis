@@ -10,6 +10,7 @@ from qiskit.circuit import Instruction
 from qiskit.circuit.library import QFT
 from utils.circuit_creation import create_circuit
 from utils.is_prime import is_prime
+from utils.convert_measurement import convert_measurement
 
 import logging
 import math
@@ -29,13 +30,13 @@ class Regev(ABC):
 
     def __init__(self,  shots) -> None:
         self.shots = shots
+        self.result = RegevResult()
 
-    def get_vector(self, N: int, semi_classical=False) -> 'RegevResult':
+    def get_vector(self, N: int, d_ceil=False, qd_ceil=False, semi_classical=False) -> 'RegevResult':
         self._validate_input(N)
 
-        result = RegevResult()
 
-        circuit = self.construct_circuit(N, semi_classical, measurement=True)
+        circuit = self.construct_circuit(N, d_ceil, qd_ceil, semi_classical, measurement=True)
         aersim = AerSimulator()
         pm = generate_preset_pass_manager(backend=aersim, optimization_level=3)
         isa_qc = pm.run(circuit)
@@ -46,13 +47,16 @@ class Regev(ABC):
 
         # counts=self.sampler().run(circuit, shots=self.shots).result().quasi_dists[0].binary_probabilities()
 
-        result.total_counts = len(counts)
-        result.total_shots = self.shots
-        print(f"counts.items(): {counts.items()}")
+        self.result.total_counts = len(counts)
+        self.result.total_shots = self.shots
+        # print(f"counts.items(): {counts.items()}")
 
-        for measurement, shots in counts.items():
+        sorted_counts_items = sorted(counts.items(), key=lambda x: x[1])
+
+        for measurement, shots in sorted_counts_items:
             # measurement = self._parse_measurement(measurement, semi_classical)
-            print(f", measurment: {measurement}   |   shots: {shots}", end="")
+            # print(f", measurment: {measurement}   |   shots: {shots}", end="")
+            self.result.output_data.append([convert_measurement(measurement), measurement, shots])
             # order = self._get_order(measurement, a, N)
             # if order:
             #     if order == 1:
@@ -65,10 +69,10 @@ class Regev(ABC):
 
                 # result.order = order
 
-            result.successful_counts += 1
-            result.successful_shots += shots
+            self.result.successful_counts += 1
+            self.result.successful_shots += shots
 
-        return result
+        return self.result
 
 
     @staticmethod
@@ -78,14 +82,28 @@ class Regev(ABC):
         return int(measurement, base=2)
 
 
-    def construct_circuit(self, N: int, semi_classical: bool = False, measurement: bool = True):
+    def construct_circuit(self, N: int, d_ceil, qd_ceil, semi_classical: bool = False, measurement: bool = True):
         self._validate_input(N)
 
         n = N.bit_length()
-        d = math.ceil(math.sqrt(n))
-        qd = math.floor(n/d) + d
 
-        print(f"N: {N}\nn: {n}\nd: {d}\nqd: {qd}")
+        if d_ceil:
+            d = math.ceil(math.sqrt(n))
+        else:
+            d = math.floor(math.sqrt(n))
+
+        if qd_ceil:
+            qd = math.ceil(math.sqrt(n))
+        else:
+            qd = math.floor(math.sqrt(n))
+
+        # print(f"N: {N}\nn: {n}\nd: {d}\nqd: {qd}")
+        self.result.N = N
+        self.result.n = n
+        self.result.d_ceil = d_ceil
+        self.result.qd_ceil = qd_ceil
+        self.result.number_of_primes = d
+        self.result.exp_register_width = qd
 
 
         if semi_classical:
@@ -157,6 +175,7 @@ class Regev(ABC):
 
         # Debugging
         print(f"a: {a}\n\n")
+        self.result.squared_primes = a
         # print(f"circuit.qubits: {circuit.qubits}")
 
         # for qubit in circuit.qubits:
@@ -288,6 +307,16 @@ class RegevResult():
         self._total_shots = 0
         self._successful_shots = 0
 
+        self._N = 0
+        self._n = 0
+        self._d_ceil = False
+        self._qd_ceil = False
+        self._number_of_primes = 0
+        self._exp_register_width = 0
+        self._squared_primes = []
+        self._output_data = []
+
+
     @property
     def order(self) -> Optional[int]:
         return self._order
@@ -327,5 +356,73 @@ class RegevResult():
     @successful_shots.setter
     def successful_shots(self, value: int) -> None:
         self._successful_shots = value
+
+
+
+    @property
+    def N(self) -> int:
+        return self._N
+
+    @N.setter
+    def N(self, value: int) -> None:
+        self._N = value
+
+    @property
+    def n(self) -> int:
+        return self._n
+
+    @n.setter
+    def n(self, value: int) -> None:
+        self._n = value
+
+    @property
+    def d_ceil(self) -> bool:
+        return self._d_ceil
+
+    @d_ceil.setter
+    def d_ceil(self, value: bool) -> None:
+        self._d_ceil = value
+
+    @property
+    def qd_ceil(self) -> bool:
+        return self._qd_ceil
+
+    @qd_ceil.setter
+    def qd_ceil(self, value: bool) -> None:
+        self._qd_ceil = value
+
+    @property
+    def number_of_primes(self) -> int:
+        return self._number_of_primes
+
+    @number_of_primes.setter
+    def number_of_primes(self, value: int) -> None:
+        self._number_of_primes = value
+
+    @property
+    def exp_register_width(self) -> int:
+        return self._exp_register_width
+
+    @exp_register_width.setter
+    def exp_register_width(self, value: int) -> None:
+        self._exp_register_width = value
+
+    @property
+    def squared_primes(self) -> []:
+        return self._squared_primes
+
+    @squared_primes.setter
+    def squared_primes(self, value: []) -> None:
+        self._squared_primes = value
+
+    @property
+    def output_data(self) -> []:
+        return self._output_data
+
+    @output_data.setter
+    def output_data(self, value: []) -> None:
+        self._output_data = value
+
+
 
 
