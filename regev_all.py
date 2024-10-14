@@ -4,16 +4,18 @@ from utils.convert_to_matrix_row import convert_to_matrix_row
 from utils.convert_milliseconds import convert_milliseconds
 import time
 
-Ns = [15, 21, 33, 35, 39, 55, 65, 77, 143]
-# Ns = [15, 21, 33]
+Ns = [91, 143]
+# Ns = [15, 21, 33, 35, 39, 55, 65, 77, 91, 143]
 
 d_ceil_bool = False
 qd_ceil_bool = False
+shots_num = 128
 
 for i in range(len(Ns)):
     start = time.time()
-    regev = Regev(shots=128)
+    regev = Regev(shots=shots_num)
     N=Ns[i]
+    print(f"\nN: {N}")
     result = regev.get_vector(N, d_ceil=d_ceil_bool, qd_ceil=qd_ceil_bool, semi_classical=False)
     end = time.time()
     exec_time = (end-start)*(10**3)
