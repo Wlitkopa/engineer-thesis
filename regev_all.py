@@ -4,12 +4,12 @@ from utils.convert_to_matrix_row import convert_to_matrix_row
 from utils.convert_milliseconds import convert_milliseconds
 import time
 
-Ns = [15, 21, 33, 35, 39, 51, 55, 57, 65, 69, 77, 85, 91, 95, 119, 143]
-# Ns = [39, 51, 57]   Need to run this for ceil_floor (despite already calculated 39)
+# Ns = [15, 21, 33, 35, 39, 51, 55, 57, 65, 69, 77, 85, 91, 95, 119, 143]
+Ns = [39, 51, 57]   # Need to run this for ceil_floor (despite already calculated 39)
 # Ns = [15, 21, 33, 35, 39, 51, 55, 57, 65, 69, 77, 85, 91, 95, 119, 143]
 
-d_ceil_bool = False
-qd_ceil_bool = True
+d_ceil_bool = True
+qd_ceil_bool = False
 shots_num = 128
 
 for i in range(len(Ns)):
