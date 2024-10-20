@@ -4,7 +4,8 @@ from utils.convert_to_matrix_row import convert_to_matrix_row
 from utils.convert_milliseconds import convert_milliseconds
 import time
 
-Ns = [55, 57, 65, 69, 77, 85, 91, 95, 119, 143]   # This needs to be calculated for ceil_ceil
+
+Ns = [57, 65, 69, 77, 85, 91, 95, 119, 143]   # This needs to be calculated for ceil_ceil
 # Ns = [85, 91, 95, 119, 143]   # This needs to be calculated for floor_ceil
 # Ns = [15, 21, 33, 35, 39, 51, 55, 57, 65, 69, 77, 85, 91, 95, 119, 143]
 
@@ -64,4 +65,11 @@ for i in range(len(Ns)):
 
     print(f"converted_time: {converted_time}")
 
+
+# regev = Regev(128)
+# a = [4, 9]
+# vect =  [19, 47]
+# N = 8051
+# p, q = regev.get_factors(vect, a, N)
+# print(f"p: {p}, q: {q}")
 

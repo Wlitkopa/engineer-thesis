@@ -15,6 +15,7 @@ from utils.convert_measurement import convert_measurement
 import logging
 import math
 from fractions import Fraction
+from decimal import Decimal, getcontext
 
 from qiskit.providers import  Backend
 from qiskit_aer import AerSimulator
@@ -24,7 +25,7 @@ from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 #from qiskit.utils.validation import validate_min
 
 logger = logging.getLogger(__name__)
-
+getcontext().prec = 1000
 
 class Regev(ABC):
 
@@ -297,8 +298,39 @@ class Regev(ABC):
         raise NotImplemented
 
 
+    def get_factors(self, vect, t_a, t_N):
+        a = self.result.squared_primes
+        N = self.result.N
+        a = t_a
+        N = t_N
+        prod = Decimal(1)
+        for i in range(len(a)):
+            sqrt_a = Decimal(a[i]).sqrt()
+            pow_a = ((sqrt_a ** vect[i]) % N)
+            prod = ((prod*pow_a) % N)
 
-class RegevResult():
+        print(f"prod: {prod}")
+        # prod = (prod % Decimal(N))
+
+        val1 = (prod - 1)
+        val2 = (prod + 1)
+        print(f"val1: {val1}\nval2: {val2}\nN: {N}")
+
+        p = math.gcd(int(val2), N)
+
+        if p == N:
+            print(f"We've got bad luck number one - p and q are both dividers of ({val2} + 1)")
+            return -1
+        elif p == 1:
+            print(f"We've got bad luck number two - p and q are both dividers of ({val2} - 1)")
+            return -1
+
+        q = int(N/p)
+
+        return p, q
+
+
+class RegevResult:
 
     def __init__(self) -> None:
         self._order = None
