@@ -43,14 +43,14 @@ class Regev(ABC):
         isa_qc = pm.run(circuit)
 
         counts = aersim.run(isa_qc, shots=self.shots).result().get_counts(0)
-        #  counts = result.get_counts(0)
+        # counts = result.get_counts(0)
         # print('Counts(ideal):', counts)
 
         # counts=self.sampler().run(circuit, shots=self.shots).result().quasi_dists[0].binary_probabilities()
 
         self.result.total_counts = len(counts)
         self.result.total_shots = self.shots
-        # print(f"counts.items(): {counts.items()}")
+        print(f"counts.items(): {counts.items()}")
 
         sorted_counts_items = sorted(counts.items(), key=lambda x: x[1])
 
@@ -204,6 +204,9 @@ class Regev(ABC):
 
         qft = QFT(qd).to_gate()
 
+
+        # UWAGA! TEN FRAGMENT KODU ZAKOMENTOWANY NA POTRZEBY TESTU, NORMALNIE MUSI BYĆ ODKOMENTOWANY
+
         for i in range(d):
             circuit.append(
                 qft,
@@ -215,6 +218,9 @@ class Regev(ABC):
                 x_creg = ClassicalRegister(qd, name=f'x{i+1}Value')
                 circuit.add_register(x_creg)
                 circuit.measure(qregs_all[i], x_creg)
+            # y_creg = ClassicalRegister(n, 'yValue')
+            # circuit.add_register(y_creg)
+            # circuit.measure(qregs_all[-2], y_creg)
 
         return circuit
 

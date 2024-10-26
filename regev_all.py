@@ -6,18 +6,21 @@ import time
 
 
 # Ns = [57, 65, 69, 77, 85, 91, 95, 119, 143]   # This needs to be calculated for ceil_ceil
-Ns = [85, 91, 95, 119, 143]   # This needs to be calculated for floor_ceil
+# Ns = [143]   # This needs to be calculated for floor_ceil
 # Ns = [15, 21, 33, 35, 39, 51, 55, 57, 65, 69, 77, 85, 91, 95, 119, 143]
+Ns = [33]
 
-d_ceil_bool = False
+d_ceil_bool = True
 qd_ceil_bool = True
 shots_num = 128
 
 for i in range(len(Ns)):
-    start = time.time()
-    regev = Regev(shots=shots_num)
+
     N=Ns[i]
     print(f"\nN: {N}")
+
+    start = time.time()
+    regev = Regev(shots=shots_num)
     result = regev.get_vector(N, d_ceil=d_ceil_bool, qd_ceil=qd_ceil_bool, semi_classical=False)
     end = time.time()
     exec_time = (end-start)*(10**3)
@@ -48,7 +51,7 @@ for i in range(len(Ns)):
         qd_mode = "floor"
 
 
-    file = open(f"output_data/{d_mode}_{qd_mode}/N_{N}", "w")
+    file = open(f"output_data/regev/{d_mode}_{qd_mode}/N_{N}", "w")
     file.write(result_str)
     file.close()
 
@@ -62,7 +65,6 @@ for i in range(len(Ns)):
     print(f"output_data: {result.output_data}")
     print(f"\nvectors: {vectors}\n")
     print(f"exec_time: {exec_time}ms")
-
     print(f"converted_time: {converted_time}")
 
 

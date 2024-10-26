@@ -45,6 +45,9 @@ class Shor(ABC):
         self._validate_input(a, N)
 
         result = ShorResult()
+        result.N = N
+        result.n = N.bit_length()
+        result.random_prime = a
 
         circuit = self.construct_circuit(a, N, semi_classical, measurement=True)
         aersim = AerSimulator()
@@ -60,9 +63,13 @@ class Shor(ABC):
         result.total_counts = len(counts)
         result.total_shots =  self.shots
 
+        all_orders = []
+
         for measurement, shots in counts.items():
             measurement = self._parse_measurement(measurement, semi_classical)
             order = self._get_order(measurement, a, N)
+
+            result.output_data.append([measurement, shots])
             if order:
                 if order == 1:
                     logger.info('Skip trivial order.')
@@ -70,12 +77,15 @@ class Shor(ABC):
 
                 if result.order and not result.order == order:
                     logger.error(f'Currently computed order {order} differs from already stored: {result.order}.')
+                    all_orders.append([order, shots])
                     continue
 
                 result.order = order
+                all_orders.append([order, shots])
                 result.successful_counts += 1
                 result.successful_shots += shots
 
+        result.all_orders = all_orders
         return result
 
     def construct_circuit(self, a: int, N: int, semi_classical: bool = False, measurement: bool = True):
@@ -248,6 +258,14 @@ class ShorResult():
         self._total_shots = 0
         self._successful_shots = 0
 
+        self._N = 0
+        self._n = 0
+        self._random_prime = 0
+        self._all_orders = []
+        self._output_data = []
+
+
+
     @property
     def order(self) -> Optional[int]:
         return self._order
@@ -287,3 +305,46 @@ class ShorResult():
     @successful_shots.setter
     def successful_shots(self, value: int) -> None:
         self._successful_shots = value
+
+
+    @property
+    def N(self) -> int:
+        return self._N
+
+    @N.setter
+    def N(self, value: int) -> None:
+        self._N = value
+
+    @property
+    def n(self) -> int:
+        return self._n
+
+    @n.setter
+    def n(self, value: int) -> None:
+        self._n = value
+
+    @property
+    def random_prime(self) -> int:
+        return self._random_prime
+
+    @random_prime.setter
+    def random_prime(self, value: int) -> None:
+        self._random_prime = value
+
+    @property
+    def all_orders(self) -> []:
+        return self._all_orders
+
+    @all_orders.setter
+    def all_orders(self, value: []) -> None:
+        self._all_orders = value
+
+    @property
+    def output_data(self) -> []:
+        return self._output_data
+
+    @output_data.setter
+    def output_data(self, value: []) -> None:
+        self._output_data = value
+
+
