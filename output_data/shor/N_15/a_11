@@ -1,0 +1,16 @@
+N: 15
+n: 4
+random a: 11
+total_shots: 128
+successful_shots: 55
+total results count: 2
+successful results count: 1
+output_data: [[0, 73], [128, 55]]
+
+all orders: 
+order with 55 shots: 2
+
+order: 2
+
+exec_time (ms): 12530.581951141357 ms
+exec_time: 12s 530.5819511413574ms

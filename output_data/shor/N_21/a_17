@@ -1,0 +1,34 @@
+N: 21
+n: 5
+random a: 17
+total_shots: 128
+successful_shots: 112
+total results count: 21
+successful results count: 18
+output_data: [[345, 1], [686, 1], [838, 1], [684, 1], [168, 1], [688, 1], [0, 14], [171, 12], [682, 3], [170, 3], [512, 24], [853, 16], [172, 1], [852, 2], [683, 12], [341, 24], [854, 5], [850, 2], [342, 2], [354, 1], [343, 1]]
+
+all orders: 
+order with 1 shots: 6
+order with 1 shots: 6
+order with 1 shots: 6
+order with 1 shots: 6
+order with 1 shots: 6
+order with 12 shots: 6
+order with 3 shots: 6
+order with 3 shots: 6
+order with 24 shots: 6
+order with 16 shots: 6
+order with 1 shots: 6
+order with 2 shots: 6
+order with 12 shots: 6
+order with 24 shots: 6
+order with 5 shots: 6
+order with 2 shots: 6
+order with 2 shots: 6
+order with 1 shots: 60
+order with 1 shots: 6
+
+order: 6
+
+exec_time (ms): 57609.132289886475 ms
+exec_time: 57s 609.1322898864746ms
