@@ -31,8 +31,8 @@ def analize_vector(file_name):
         while (line := results.readline()) != '\n':
             v = line.split(':')[1][:-2]
             duplicate = int(line.split(' ')[2])
-            for i in range(min(d+4, duplicate)):
-                vectors.append(ast.literal_eval(v))
+            #for i in range(min(d+4, duplicate)):
+            vectors.append(ast.literal_eval(v))
 
         print(vectors)
         print(dq)
@@ -57,15 +57,23 @@ def analize_vector(file_name):
             M_LLL_inv = np.matrix(M_LLL).transpose().tolist()
 
             for i in range(d):
-                square = 0
+                square = 1
+                f = 0
                 for j in range(d):
-                    square += a[j] ** (M_LLL_inv[i][j])
-                if square % N == 1:
-                    print(w_d4_d)
+                    if M_LLL_inv[i][j] < 0:
+                        f = 1
+                        break
+                    #print(a[j], M_LLL_inv[i][j])
+                    #print(pow(a[j], (M_LLL_inv[i][j]), N))
+                    square *= pow(a[j], (M_LLL_inv[i][j]), N)
+                    square %= N
+                #print(square)
+                if square % N == 1 and f == 0:
+                    print('SUCKES', w_d4_d)
 
 
 # A = np.identity(3)
 # olll.reduction(A, 0.75)
-analize_vector("./ceil_ceil/N_21")
+analize_vector("./N_21")
 
 
