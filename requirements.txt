@@ -1,8 +1,11 @@
-qiskit==1.0.1
+qiskit~=1.2.2
 
-numpy
+numpy~=1.26.4
 scipy
 sympy
 jupyter
 matplotlib
 pylatexenc
+
+qiskit-aer~=0.15.1
+olll~=1.0.2

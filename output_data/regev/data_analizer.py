@@ -74,6 +74,6 @@ def analize_vector(file_name):
 
 # A = np.identity(3)
 # olll.reduction(A, 0.75)
-analize_vector("./N_21")
+analize_vector("./ceil_ceil/N_21")
 
 
