@@ -10,7 +10,7 @@ import time
 # Ns = [15, 21, 33, 35, 39, 51, 55, 57, 65, 69, 77, 85, 91, 95, 119, 143]
 Ns = [33]
 
-d_ceil_bool = True
+d_ceil_bool = False
 qd_ceil_bool = True
 shots_num = 128
 
@@ -51,9 +51,9 @@ for i in range(len(Ns)):
         qd_mode = "floor"
 
 
-    file = open(f"output_data/regev/{d_mode}_{qd_mode}/N_{N}", "w")
-    file.write(result_str)
-    file.close()
+    # file = open(f"output_data/regev/{d_mode}_{qd_mode}/N_{N}", "w")
+    # file.write(result_str)
+    # file.close()
 
     print(f"N: {result.N}")
     print(f"n: {result.n}")
