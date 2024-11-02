@@ -58,7 +58,6 @@ def analize_vector(file_name, number_of_combinations):
         success2_f = 0
 
         for i in range(number_of_combinations):
-            print(i)
             # get random combinations from vectors
             shuffle(vectors)
             w_d4_d = vectors[:d+4]
