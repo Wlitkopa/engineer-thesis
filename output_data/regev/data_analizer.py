@@ -95,4 +95,5 @@ def analize_vector(file_name):
 
 # A = np.identity(3)
 # olll.reduction(A, 0.75)
-analize_vector("./output_data/regev/ceil_ceil/N_21")
+file_name = "/home/koan/myHome/AGH/PracaInżynierska/pycharm_github/shor_mmik/output_data/regev/quantum_part/ceil_ceil/N_51"
+analize_vector(file_name)

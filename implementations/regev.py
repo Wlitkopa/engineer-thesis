@@ -2,7 +2,7 @@ from typing import Union, Tuple, Optional
 
 import numpy as np
 from abc import ABC, abstractmethod
-from itertools import chain
+from itertools import chain, combinations
 
 from qiskit import QuantumRegister, AncillaRegister, QuantumCircuit, ClassicalRegister
 
@@ -11,11 +11,26 @@ from qiskit.circuit.library import QFT
 from utils.circuit_creation import create_circuit
 from utils.is_prime import is_prime
 from utils.convert_measurement import convert_measurement
+from utils.convert_to_matrix_row import convert_to_matrix_row
+from utils.convert_milliseconds import convert_milliseconds
 
 import logging
 import math
+import olll
+from random import shuffle
 from fractions import Fraction
 from decimal import Decimal, getcontext
+import time
+
+
+# Importy z data_analizer.py
+import os
+import ast
+import math
+import olll
+import itertools
+import numpy as np
+
 
 from qiskit.providers import  Backend
 from qiskit_aer import AerSimulator
@@ -27,15 +42,222 @@ from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 logger = logging.getLogger(__name__)
 getcontext().prec = 1000
 
+
 class Regev(ABC):
 
     def __init__(self,  shots) -> None:
         self.shots = shots
         self.result = RegevResult()
+        self.vectors = []
 
-    def get_vector(self, N: int, d_ceil=False, qd_ceil=False, semi_classical=False) -> 'RegevResult':
+
+    def run_all_algorithm(self):
+        pass
+
+    def run_classical_part(self):
+        pass
+
+    def run_quantum_part(self, Ns, d_qd_list):
+
+        for i in range(len(d_qd_list)):
+            d_ceil_bool = d_qd_list[i][0]
+            qd_ceil_bool = d_qd_list[i][1]
+
+            for j in range(len(Ns)):
+
+                N = Ns[j]
+                print(f"\nN: {N}")
+
+                start = time.time()
+                result = self.get_vectors(N, d_ceil=d_ceil_bool, qd_ceil=qd_ceil_bool, semi_classical=False)
+                end = time.time()
+                exec_time = (end - start) * (10 ** 3)
+                converted_time = convert_milliseconds(exec_time)
+
+                vectors = convert_to_matrix_row(result.output_data)
+
+                result_str = (f"N: {result.N}\n"
+                              f"n: {result.n}\n"
+                              f"d_ceil: {result.d_ceil}\n"
+                              f"qd_ceil: {result.qd_ceil}\n"
+                              f"number_of_primes (d): {result.number_of_primes}\n"
+                              f"exp_register_width (qd): {result.exp_register_width}\n"
+                              f"squared_primes: {result.squared_primes}\n"
+                              f"output_data: {result.output_data}\n"
+                              f"\nvectors: {vectors}\n"
+                              f"\nexec_time (ms): {exec_time} ms\n"
+                              f"exec_time: {converted_time}")
+
+                if d_ceil_bool:
+                    d_mode = "ceil"
+                else:
+                    d_mode = "floor"
+
+                if qd_ceil_bool:
+                    qd_mode = "ceil"
+                else:
+                    qd_mode = "floor"
+
+                file = open(f"output_data/regev/quantum_part_2/{d_mode}_{qd_mode}/N_{N}", "w")
+                file.write(result_str)
+                file.close()
+
+                print(f"N: {result.N}")
+                print(f"n: {result.n}")
+                print(f"d_ceil: {result.d_ceil}")
+                print(f"qd_ceil: {result.qd_ceil}")
+                print(f"number_of_primes: {result.number_of_primes}")
+                print(f"exp_register_width: {result.exp_register_width}")
+                print(f"squared_primes: {result.squared_primes}")
+                print(f"output_data: {result.output_data}")
+                print(f"\nvectors: {vectors}\n")
+                print(f"exec_time: {exec_time}ms")
+                print(f"converted_time: {converted_time}")
+
+
+    def run_file_data_analyzer(self, file_name):
+
+        if not os.path.exists(file_name):
+            print(f"File {file_name} doesn't exists")
+            return -1
+
+        start = time.time()
+
+        result = ""
+        vectors = []
+        p_q_vectors = []
+
+        dir1_part = file_name.split("/")[-2].split("_")[0]
+        dir2_part = file_name.split("/")[-2].split("_")[1]
+
+        print(f"dir1_part: {dir1_part}\ndir2_part: {dir2_part}")
+
+        with open(file_name) as results:
+
+            dq = 0
+            for i in range(10):
+                line = results.readline()
+                if i == 0:
+                    N = int(line.split(' ')[1])
+                if i == 4:
+                    d = int(line.split(':')[1][:-1])
+                if i == 5:
+                    dq = int(line.split(':')[1][:-1])
+                if i == 6:
+                    a = ast.literal_eval(line.split(':')[1])
+                    a_root = []
+                    for a_ in a:
+                        a_root.append(int(math.sqrt(a_)))
+
+            while (line := results.readline()) != '\n':
+                v = line.split(':')[1][:-2]
+                duplicate = int(line.split(' ')[2])
+                # for i in range(min(d+4, duplicate)):
+                vectors.append(ast.literal_eval(v))
+
+            shuffle(vectors)
+            print(vectors)
+            print(dq)
+
+        qd = dq
+
+        n = N.bit_length()
+        result += (f"N: {N}\n"
+                   f"n: {n}\n"
+                   f"number_of_primes (d): {d}\n"
+                   f"exp_register_width (qd): {qd}\n"
+                   f"squared primes (a): {a_root}\n\n")
+
+
+        # self.get_vectors(N, d_ceil, qd_ceil, semi_classical)
+        np.set_printoptions(suppress=True)
+        # if len(self.vectors) == 0:
+        #     return -1
+        #
+        # d = self.result.number_of_primes
+        # qd = self.result.exp_register_width
+        # a = self.result.squared_primes
+        # vectors = self.vectors
+
+        T = 2
+        R = math.ceil(6 * T * math.sqrt((d + 5) * (2 * d) + 4) * (d / 2) * (2 ** ((qd + 1) / (d + 4) + d + 2)))
+        t = 1 + math.ceil(math.log(math.sqrt(d) * R, 2))
+        delta = math.sqrt(d / 2) / R
+        delta_inv = R / math.sqrt(d / 2)
+
+        result += (f"T: {T}\n"
+                   f"R: {R}\n"
+                   f"t: {t}\n"
+                   f"delta: {delta}\n"
+                   f"delta_inv: {delta_inv}\n\n")
+
+        I_d = np.identity(d)
+        zeros_d_d4 = np.zeros((d, d + 4))
+        I_d4_d4_delta = delta_inv * np.identity(d + 4)
+
+        number_of_combinations = 0
+        success1 = 0
+        success2 = 0
+        successful_vectors = set()
+
+        for w_d4_d in itertools.combinations(vectors, d + 4):
+
+            number_of_combinations += 1
+            M = np.block([
+                [I_d, zeros_d_d4],
+                [np.matrix(list(w_d4_d)), I_d4_d4_delta],
+            ])
+            M_LLL = olll.reduction(M.transpose().tolist(), 0.75)
+            M_LLL_inv = np.matrix(M_LLL).transpose().tolist()
+
+            for i in range(d):
+                square = 1
+                for j in range(d):
+                    square *= pow(a_root[j], (M_LLL_inv[i][j]), N)
+                    square %= N
+                if (square * square) % N == 1:
+                    break
+            if (square * square) % N == 1:
+                success1 += 1
+                if square != N - 1 and square != 1:
+                    print(f"Vector that gives p and q: {str(v)}")
+                    p_q_vectors.append(str(v))
+                    success2 += 1
+                for v in w_d4_d:
+                    successful_vectors.add(str(v))
+
+        unsuccessful_vectors = vectors
+        for v in successful_vectors:
+            unsuccessful_vectors.remove(ast.literal_eval(v))
+
+        end = time.time()
+        exec_time = (end - start) * (10 ** 3)
+        converted_time = convert_milliseconds(exec_time)
+
+        result += (f"Number of combinations that result % N = 1: {success1 * 100 / number_of_combinations}%\n"
+                   f"Number of combinations that give p and q: {success2 * 100 / number_of_combinations}%\n"
+                   f"Unsuccessful vectors {unsuccessful_vectors}\n"
+                   f"Successful vectors {successful_vectors}\n"
+                   f"Vectors that gives p and q: {p_q_vectors}\n"
+                   f"\nexec_time (ms): {exec_time} ms\n"
+                   f"exec_time: {converted_time}")
+
+        file = open(f"output_data/regev/classical_part/file_analysis/{dir1_part}_{dir2_part}/N_{N}", "w")
+        file.write(result)
+        file.close()
+
+        print(f'Number of combinations that result % N = 1: {success1 * 100 / number_of_combinations}%')
+        print(f'Number of combinations that give p and q: {success2 * 100 / number_of_combinations}%')
+        print(f'Successful vectors {successful_vectors}')
+        print(f'Vectors that give p and q: {p_q_vectors}')
+        print(f'Unsuccessful vectors {unsuccessful_vectors}')
+
+        print(f"exec_time: {exec_time}ms")
+        print(f"converted_time: {converted_time}")
+
+
+    def get_vectors(self, N: int, d_ceil=False, qd_ceil=False, semi_classical=False) -> 'RegevResult':
         self._validate_input(N)
-
 
         circuit = self.construct_circuit(N, d_ceil, qd_ceil, semi_classical, measurement=True)
         aersim = AerSimulator()
@@ -57,7 +279,9 @@ class Regev(ABC):
         for measurement, shots in sorted_counts_items:
             # measurement = self._parse_measurement(measurement, semi_classical)
             # print(f", measurment: {measurement}   |   shots: {shots}", end="")
-            self.result.output_data.append([convert_measurement(measurement), measurement, shots])
+            vector = convert_measurement(measurement)
+            self.result.output_data.append([vector, measurement, shots])
+            self.vectors.append(vector)
             # order = self._get_order(measurement, a, N)
             # if order:
             #     if order == 1:
@@ -73,7 +297,10 @@ class Regev(ABC):
             self.result.successful_counts += 1
             self.result.successful_shots += shots
 
-        return self.result
+        result = self.result
+        self.result = RegevResult()
+
+        return result
 
 
     @staticmethod
@@ -225,90 +452,11 @@ class Regev(ABC):
         return circuit
 
 
-    def _construct_circuit_with_semiclassical_QFT(self, N: int, n: int, d: int, qd: int) -> QuantumCircuit:
-
-        # CZĘŚĆ NiP (utworzenie rejestrów)
-
-        x_qregs_spec = dict()
-        a = self.generate_a(d, N)
-
-        # Input registers, each has qd-qubits
-        for i in range(d):
-            x_qregs_spec[f'x{i + 1}'] = qd
-        x_qregs = [QuantumRegister(size, name=name) for name, size in x_qregs_spec.items()]
-
-        # Output register, has n qubits (because of mod N)
-        y_qreg = QuantumRegister(n, 'y')
-
-        # Creating quantum circuit
-        aux_qreg = AncillaRegister(self._get_aux_register_size(n), 'aux')
-        circuit = QuantumCircuit(*x_qregs, y_qreg, aux_qreg, name=self._get_name(N, d))
-
-
-
-        x_qreg = QuantumRegister(1, 'x')
-        y_qreg = QuantumRegister(n, 'y')
-        aux_qreg = AncillaRegister(self._get_aux_register_size(n), 'aux')
-
-        x_creg = [ClassicalRegister(1, f'xV{i}') for i in range(2 * n)]
-        aux_creg = ClassicalRegister(1, 'auxValue')
-
-        name = f'{self._get_name(a, N)} (semi-classical QFT)'
-        circuit = QuantumCircuit(x_qreg, y_qreg, aux_qreg, *x_creg, aux_creg, name=name)
-
-        circuit.x(y_qreg[0])
-
-        max_i = 2 * n - 1
-        for i in range(0, 2 * n):
-            circuit.h(x_qreg)
-
-            partial_constant = pow(a, pow(2, max_i - i), mod=N)
-            modular_multiplication_gate = self._modular_multiplication_gate(partial_constant, N, n)
-            circuit.append(
-                modular_multiplication_gate,
-                chain([x_qreg[0]], y_qreg, aux_qreg)
-            )
-
-            for j in range(i):
-                angle = -np.pi / float(pow(2, i - j))
-                circuit.p(angle, x_qreg[0]).c_if(x_creg[j], 1)
-
-            circuit.h(x_qreg)
-            circuit.measure(x_qreg[0], x_creg[i][0])
-            circuit.measure(x_qreg[0], aux_creg[0])
-            circuit.x(x_qreg).c_if(aux_creg, 1)
-
-        circuit.measure(x_qreg[0], aux_creg[0])
-
-        return circuit
-
-
-    @abstractmethod
-    def _get_aux_register_size(self, n: int) -> int:
-        raise NotImplemented
-
-    def _get_name(self, N: int, d: int) -> str:
-        return f'{self._prefix} Regev(N={N}, d={d})'
-
-    @property
-    @abstractmethod
-    def _prefix(self) -> str:
-        raise NotImplemented
-
-    @abstractmethod
-    def _modular_exponentiation_gate(self, constant: int, N: int, n: int, qd: int) -> Instruction:
-        raise NotImplemented
-
-    @abstractmethod
-    def _modular_multiplication_gate(self, constant: int, N: int, n: int) -> Instruction:
-        raise NotImplemented
-
-
     def get_factors(self, vect, t_a, t_N):
         a = self.result.squared_primes
         N = self.result.N
-        a = t_a
-        N = t_N
+        # a = t_a
+        # N = t_N
         prod = Decimal(1)
         for i in range(len(a)):
             sqrt_a = Decimal(a[i]).sqrt()
@@ -334,6 +482,29 @@ class Regev(ABC):
         q = int(N/p)
 
         return p, q
+
+
+    @abstractmethod
+    def _get_aux_register_size(self, n: int) -> int:
+        raise NotImplemented
+
+    def _get_name(self, N: int, d: int) -> str:
+        return f'{self._prefix} Regev(N={N}, d={d})'
+
+    @property
+    @abstractmethod
+    def _prefix(self) -> str:
+        raise NotImplemented
+
+    @abstractmethod
+    def _modular_exponentiation_gate(self, constant: int, N: int, n: int, qd: int) -> Instruction:
+        raise NotImplemented
+
+    @abstractmethod
+    def _modular_multiplication_gate(self, constant: int, N: int, n: int) -> Instruction:
+        raise NotImplemented
+
+
 
 
 class RegevResult:
@@ -460,7 +631,6 @@ class RegevResult:
     @output_data.setter
     def output_data(self, value: []) -> None:
         self._output_data = value
-
 
 
 
