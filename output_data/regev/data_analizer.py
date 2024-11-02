@@ -81,8 +81,6 @@ def analize_vector(file_name):
                     success2 += 1
                 for v in w_d4_d:
                     successful_vectors.add(str(v))
-            else:
-                print(M_LLL_inv, square)
 
         print(f'Number of combinations that result % N = 1: {success1*100/number_of_combinations}%')
         print(f'Number of combinations that give p and q: {success2*100/number_of_combinations}%')
