@@ -282,17 +282,6 @@ class Regev(ABC):
             vector = convert_measurement(measurement)
             self.result.output_data.append([vector, measurement, shots])
             self.vectors.append(vector)
-            # order = self._get_order(measurement, a, N)
-            # if order:
-            #     if order == 1:
-            #         logger.info('Skip trivial order.')
-            #         continue
-            #
-            #     if result.order and not result.order == order:
-            #         logger.error(f'Currently computed order {order} differs from already stored: {result.order}.')
-            #         continue
-
-                # result.order = order
 
             self.result.successful_counts += 1
             self.result.successful_shots += shots
@@ -325,7 +314,6 @@ class Regev(ABC):
         else:
             qd = math.floor(n/d) + d
 
-        # print(f"N: {N}\nn: {n}\nd: {d}\nqd: {qd}")
         self.result.N = N
         self.result.n = n
         self.result.d_ceil = d_ceil
@@ -361,8 +349,6 @@ class Regev(ABC):
 
     @staticmethod
     def _validate_input(N: int):
-        # validate_min('N', N, 3)
-        # validate_min('a', a, 2)
 
         if N < 1 or N % 2 == 0:
             raise ValueError(f'The input N needs to be an odd integer greater than 1. Provided N = {N}.')
