@@ -1,6 +1,6 @@
 venv/
 .venv/
-utils/.secrets.py
+utils/secrets.py
 
 
 

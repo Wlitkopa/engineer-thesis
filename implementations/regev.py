@@ -21,6 +21,7 @@ from random import shuffle
 from fractions import Fraction
 from decimal import Decimal, getcontext
 import time
+from utils.secrets import ibm_api_token
 
 
 # Importy z data_analizer.py
@@ -116,7 +117,150 @@ class Regev(ABC):
                 print(f"converted_time: {converted_time}")
 
 
-    def run_file_data_analyzer(self, file_name):
+    def run_file_data_analyzer_new(self, file_name, number_of_combinations):
+
+        if not os.path.exists(file_name):
+            print(f"File {file_name} doesn't exists")
+            return -1
+
+        start = time.time()
+
+        result = ""
+        vectors = []
+        p_q_positive_vectors = []
+        p_q_negative_vectors = []
+
+        dir1_part = file_name.split("/")[-2].split("_")[0]
+        dir2_part = file_name.split("/")[-2].split("_")[1]
+
+        print(f"dir1_part: {dir1_part}\ndir2_part: {dir2_part}")
+
+        with open(file_name) as results:
+
+            # read parameters from input file
+            dq = 0
+            for i in range(10):
+                line = results.readline()
+                if i == 0:
+                    N = int(line.split(' ')[1])
+                if i == 4:
+                    d = int(line.split(':')[1][:-1])
+                if i == 5:
+                    dq = int(line.split(':')[1][:-1])
+                if i == 6:
+                    a = ast.literal_eval(line.split(':')[1])
+                    a_root = []
+                    for a_ in a:
+                        a_root.append(int(math.sqrt(a_)))
+
+            # read vectors from file
+            while (line := results.readline()) != '\n':
+                v = line.split(':')[1][:-2]
+                duplicate = int(line.split(' ')[2])
+                for i in range(min(d + 4, duplicate)):
+                    vectors.append(ast.literal_eval(v))
+
+            # calculate parameters necessary to create lattice
+            T = 2
+            R = math.ceil(6 * T * math.sqrt((d + 5) * (2 * d) + 4) * (d / 2) * (2 ** ((dq + 1) / (d + 4) + d + 2)))
+            t = 1 + math.ceil(math.log(math.sqrt(d) * R, 2))
+            delta = math.sqrt(d / 2) / R
+            delta_inv = R / math.sqrt(d / 2)
+
+            # create block of lattice
+            I_d = np.identity(d)
+            zeros_d_d4 = np.zeros((d, d + 4))
+            I_d4_d4_delta = delta_inv * np.identity(d + 4)
+
+            success1 = 0
+            success2 = 0
+            success1_f = 0
+            success2_f = 0
+
+            for i in range(number_of_combinations):
+                # get random combinations from vectors
+                shuffle(vectors)
+                w_d4_d = vectors[:d + 4]
+                # create lattice M with usage created blocks according to Regev algorithm
+                M = np.block([
+                    [I_d, zeros_d_d4],
+                    [np.matrix(w_d4_d), I_d4_d4_delta],
+                ])
+
+                # make LLL algorithm on columns of lattice M
+                M_LLL = olll.reduction(M.transpose().tolist(), 0.75)
+                M_LLL_t = np.matrix(M_LLL).transpose().tolist()
+
+                # create flags to count different solutions from lattice once
+                s1 = 0
+                s2 = 0
+                s1_f = 0
+                s2_f = 0
+                # check if given combinations of vectors returns correct solution
+
+                for i in range(d):
+                    square = 1
+                    f = 0
+                    for j in range(d):
+                        square *= pow(a_root[j], (M_LLL_t[i][j]), N)
+                        square %= N
+                        if M_LLL_t[i][j] < 0:
+                            f = 1
+                    if (square * square) % N == 1 and f == 0:
+                        s1 = 1
+                        if square != N - 1 and square != 1:
+                            s2 = 1
+                            p_q_positive_vectors.append(str(v))
+                    if (square * square) % N == 1 and f == 1:
+                        s1_f = 1
+                        if square != N - 1 and square != 1:
+                            s2_f = 1
+                            p_q_negative_vectors.append(str(v))
+
+                if s1 == 1:
+                    success1 += 1
+                elif s1_f == 1:
+                    success1_f += 1
+
+                if s2 == 1:
+                    success2 += 1
+                elif s2_f == 1:
+                    success2_f += 1
+
+        end = time.time()
+        exec_time = (end - start) * (10 ** 3)
+        converted_time = convert_milliseconds(exec_time)
+
+        result += (f"Percent of combinations (with positive values of result vector) that gives % N = 1: {success1 * 100 / number_of_combinations}%\n"
+                   f"Percent of combinations (with positive values of result vector) that give p and q: {success2 * 100 / number_of_combinations}%\n"
+                   f"Percent of combinations (including negative values) that gives % N = 1: {(success1_f + success1) * 100 / number_of_combinations}%\n"
+                   f"Percent of combinations (including negative values) that give p and q: {(success2_f + success2) * 100 / number_of_combinations}%\n"
+                   # f"Unsuccessful vectors {unsuccessful_vectors}\n"
+                   # f"Successful vectors {successful_vectors}\n"
+                   f"Vectors that gives p and q (with positive values): {p_q_positive_vectors}\n"
+                   f"Vectors that gives p and q (with negative values): {p_q_negative_vectors}"
+                   f"\nexec_time (ms): {exec_time} ms\n"
+                   f"exec_time: {converted_time}")
+
+
+        file = open(f"output_data/regev/classical_part/file_analysis/{dir1_part}_{dir2_part}/N_{N}", "w")
+        file.write(result)
+        file.close()
+
+        print(f'Percent of combinations (with positive values of result vector) that gives % N = 1: {success1 * 100 / number_of_combinations}%')
+        print(f'Percent of combinations (with positive values of result vector) that give p and q: {success2 * 100 / number_of_combinations}%')
+        print(f'Percent of combinations (including negative values) that gives % N = 1: {(success1_f + success1) * 100 / number_of_combinations}%')
+        print(f'Percent of combinations (including negative values) that give p and q: {(success2_f + success2) * 100 / number_of_combinations}%')
+        print(f"Vectors that gives p and q (with positive values): {p_q_positive_vectors}")
+        print(f"Vectors that gives p and q (with negative values): {p_q_negative_vectors}")
+        print(f"\nexec_time (ms): {exec_time} ms")
+        print(f"exec_time: {converted_time}")
+
+        print(f"exec_time: {exec_time}ms")
+        print(f"converted_time: {converted_time}")
+
+
+    def run_file_data_analyzer_old(self, file_name):
 
         if not os.path.exists(file_name):
             print(f"File {file_name} doesn't exists")
@@ -470,17 +614,20 @@ class Regev(ABC):
 
         return p, q
 
+
     def run_on_quantum_computer(self, N: int, d_ceil=False, qd_ceil=False, semi_classical=False):
         self._validate_input(N)
+        result_str = ""
 
-        QiskitRuntimeService.save_account(channel="ibm_quantum", overwrite=True, token="API_TOKEN")
+        QiskitRuntimeService.save_account(channel="ibm_quantum", overwrite=True, token=ibm_api_token)
         service = QiskitRuntimeService()
         backend = service.least_busy(operational=True, simulator=False, min_num_qubits=127)
         circuit = self.construct_circuit(N, d_ceil, qd_ceil, semi_classical, measurement=True)
         print(circuit)
         print(f"Number of qubits: {circuit.num_qubits}")
+
         print(f"Number of classical bits: {circuit.num_clbits}")
-        print(f'backbaend name: {backend.name}')
+        print(f'Backend name: {backend.name}')
         pm = generate_preset_pass_manager(backend=backend, optimization_level=0)
         isa_circuit = pm.run(circuit)
         print(isa_circuit)
@@ -488,6 +635,25 @@ class Regev(ABC):
         job = sampler.run([isa_circuit])
         result = job.result()
         print(f" > Counts: {result[0].data.meas.get_counts()}")
+
+        if d_ceil:
+            d_mode = "ceil"
+        else:
+            d_mode = "floor"
+
+        if qd_ceil:
+            qd_mode = "ceil"
+        else:
+            qd_mode = "floor"
+
+        result_str += (f"Number of qubits: {circuit.num_qubits}\n"
+                       f"Number of classical bits: {circuit.num_clbits}\n"
+                       f"Backend name: {backend.name}\n"
+                       f" > Counts: {result[0].data.meas.get_counts()}")
+
+        file = open(f"output_data/regev/quantum_computer/{d_mode}_{qd_mode}/N_{N}", "w")
+        file.write(result_str)
+        file.close()
 
 
     @abstractmethod
