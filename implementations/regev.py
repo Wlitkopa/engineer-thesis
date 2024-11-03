@@ -469,6 +469,25 @@ class Regev(ABC):
 
         return p, q
 
+        def run_on_quantum_computer(self, N: int, d_ceil=False, qd_ceil=False, semi_classical=False):
+            self._validate_input(N)
+    
+            QiskitRuntimeService.save_account(channel="ibm_quantum", overwrite=True, token="API_TOKEN")
+            service = QiskitRuntimeService()
+            backend = service.least_busy(operational=True, simulator=False, min_num_qubits=127)
+            circuit = self.construct_circuit(N, d_ceil, qd_ceil, semi_classical, measurement=True)
+            print(circuit)
+            print(f"Number of qubits: {circuit.num_qubits}")
+            print(f"Number of classical bits: {circuit.num_clbits}")
+            print(f'backbaend name: {backend.name}')
+            pm = generate_preset_pass_manager(backend=backend, optimization_level=0)
+            isa_circuit = pm.run(circuit)
+            print(isa_circuit)
+            sampler = Sampler(backend)
+            job = sampler.run([isa_circuit])
+            result = job.result()
+            print(f" > Counts: {result[0].data.meas.get_counts()}")
+
 
     @abstractmethod
     def _get_aux_register_size(self, n: int) -> int:
