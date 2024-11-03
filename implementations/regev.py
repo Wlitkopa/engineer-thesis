@@ -36,6 +36,7 @@ from qiskit.providers import  Backend
 from qiskit_aer import AerSimulator
 from qiskit_ibm_runtime import QiskitRuntimeService
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
+from qiskit_ibm_runtime import SamplerV2 as Sampler
 
 #from qiskit.utils.validation import validate_min
 
