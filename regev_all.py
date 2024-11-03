@@ -13,6 +13,8 @@ regev = Regev(shots_num)
 Ns = [15]
 d_qd_list = [[False, False]]
 regev.run_quantum_part(Ns, d_qd_list)
+# if you want to run Regev on quantum computer
+# regev.run_on_quantum_computer(Ns[0], d_ceil=True, qd_ceil=True, semi_classical=False)
 
 
 file_name = "/home/koan/myHome/AGH/PracaInżynierska/pycharm_github/shor_mmik/output_data/regev/quantum_part/ceil_ceil/N_51"
