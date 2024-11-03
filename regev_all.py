@@ -18,7 +18,7 @@ d_qd_list = [[False, False]]
 # Analysing data from a quantum part output file (new version)
 file_name = "/home/koan/myHome/AGH/PracaInżynierska/pycharm_github/shor_mmik/output_data/regev/quantum_part/ceil_ceil/N_51"
 number_of_combinations = 50
-regev.run_file_data_analyzer_new(file_name, number_of_combinations)
+# regev.run_file_data_analyzer_new(file_name, number_of_combinations)
 
 # Analysing data from a quantum part output file (old version)
 file_name = "/home/koan/myHome/AGH/PracaInżynierska/pycharm_github/shor_mmik/output_data/regev/quantum_part/ceil_ceil/N_51"
@@ -26,8 +26,8 @@ file_name = "/home/koan/myHome/AGH/PracaInżynierska/pycharm_github/shor_mmik/ou
 
 # if you want to run Regev on quantum computer
 N = 15
-d_ceil_bool = False
-qd_ceil_bool = False
-# regev.run_on_quantum_computer(N, d_ceil_bool, qd_ceil_bool)
+d_ceil_bool = True
+qd_ceil_bool = True
+regev.run_on_quantum_computer(N, d_ceil_bool, qd_ceil_bool)
 
 
