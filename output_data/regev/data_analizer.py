@@ -45,7 +45,7 @@ def analize_vector(file_name, number_of_combinations):
         R = math.ceil(6*T*math.sqrt((d+5)*(2*d)+4)*(d/2)*(2**((dq+1)/(d+4)+d+2)))
         t = 1 + math.ceil(math.log(math.sqrt(d)*R, 2))
         delta = math.sqrt(d/2)/R
-        delta_inv = R/math.sqrt(d/2)
+        delta_inv = math.ceil(R/math.sqrt(d/2))
 
         # create block of lattice
         I_d = np.identity(d)
@@ -124,4 +124,6 @@ def analize_vector(file_name, number_of_combinations):
 
 # A = np.identity(3)
 # olll.reduction(A, 0.75)
-analize_vector("./output_data/regev/ceil_ceil/N_21", 100)
+for number in [21, 33, 35, 39, 51, 55, 57]:
+    print(number)
+    analize_vector(f"./quantum_part/ceil_ceil/N_{number}", 1000)
