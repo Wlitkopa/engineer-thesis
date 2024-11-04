@@ -50,7 +50,7 @@ def analize_vector(file_name, number_of_combinations):
 
         T = N
 
-        for p in itertools.product(powers, repeat=3):
+        for p in itertools.product(powers, repeat=d):
             if p == (0,) * d:
                 # print("UWAGA:", p)
                 continue
@@ -60,18 +60,18 @@ def analize_vector(file_name, number_of_combinations):
                 T_tmp *= pow(a_root[i], p[i], N)
                 v_len_tmp += pow(p[i], 2)
             v_len_tmp = math.ceil(math.sqrt(v_len_tmp))
-            # print(p, T_tmp, v_len_tmp)
+            print(p, T_tmp, v_len_tmp)
             if T_tmp % N == 1 and v_len_tmp < T:
-                # print(a_root)
-                # print(p)
-                # print(v_len_tmp)
+                print(a_root)
+                print(p)
+                print(v_len_tmp)
                 T = v_len_tmp
         # print('T', T)
         R = math.ceil(6*T*math.sqrt((d+5)*(2*d)+4)*(d/2)*(2**((dq+1)/(d+4)+d+2)))
         t = 1 + math.ceil(math.log(math.sqrt(d)*R, 2))
         delta = math.sqrt(d/2)/R
         delta_inv = math.ceil(R/math.sqrt(d/2))
-        print(f"Parameters:\nR: {R}\nT: {T}\nt: {t}\ndelta: {delta}\ndelta_inv {delta_inv}")
+        print(f"Parameters:\nN: {N}\nR: {R}\nT: {T}\nt: {t}\ndelta: {delta}\ndelta_inv {delta_inv}")
 
         # create block of lattice
         I_d = np.identity(d)
@@ -116,6 +116,7 @@ def analize_vector(file_name, number_of_combinations):
                     s1 = 1
                     if square != N - 1 and square != 1:
                         s2 = 1
+                        break
                 # if (square*square) % N == 1 and f == 1:
                 #     s1_f = 1
                 #     if square != N-1 and square != 1:
@@ -152,5 +153,4 @@ def analize_vector(file_name, number_of_combinations):
 # olll.reduction(A, 0.75)
 #[15, 21, 33, 35, 39, 51, 55, 57]
 for number in [15, 21, 33, 35, 39, 51, 55, 57]:
-    print(number)
     analize_vector(f"./quantum_part/ceil_ceil/N_{number}", 100)
