@@ -60,11 +60,11 @@ def analize_vector(file_name, number_of_combinations):
                 T_tmp *= pow(a_root[i], p[i], N)
                 v_len_tmp += pow(p[i], 2)
             v_len_tmp = math.ceil(math.sqrt(v_len_tmp))
-            print(p, T_tmp, v_len_tmp)
+            # print(p, T_tmp, v_len_tmp)
             if T_tmp % N == 1 and v_len_tmp < T:
-                print(a_root)
-                print(p)
-                print(v_len_tmp)
+                # print(a_root)
+                # print(p)
+                # print(v_len_tmp)
                 T = v_len_tmp
         # print('T', T)
         R = math.ceil(6*T*math.sqrt((d+5)*(2*d)+4)*(d/2)*(2**((dq+1)/(d+4)+d+2)))
