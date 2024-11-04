@@ -23,6 +23,8 @@ def analize_vector(file_name, number_of_combinations):
             line = results.readline()
             if i == 0:
                 N = int(line.split(' ')[1])
+            if i == 1:
+                n = int(line.split(' ')[1])
             if i == 4:
                 d = int(line.split(':')[1][:-1])
             if i == 5:
@@ -41,7 +43,26 @@ def analize_vector(file_name, number_of_combinations):
                 vectors.append(ast.literal_eval(v))
 
         # calculate parameters necessary to create lattice
-        T = 2
+        m = math.ceil(n/d) + 1
+        powers = []
+        for i in range(m):
+            powers.append(i)
+
+        T = N
+        v_len = N
+
+        for p in itertools.combinations_with_replacement(powers, d):
+            if p == (0,) * d:
+                continue
+            T_tmp = 1
+            v_len_tmp = 1
+            for i in range(d):
+                T_tmp *= pow(a_root[i], p[i], N)
+                v_len_tmp += pow(p[i], 2)
+            v_len_tmp = math.ceil(math.sqrt(v_len_tmp))
+            if T_tmp % N == 1 and v_len_tmp < T:
+                T = v_len_tmp
+        print('T', T)
         R = math.ceil(6*T*math.sqrt((d+5)*(2*d)+4)*(d/2)*(2**((dq+1)/(d+4)+d+2)))
         t = 1 + math.ceil(math.log(math.sqrt(d)*R, 2))
         delta = math.sqrt(d/2)/R
@@ -54,8 +75,8 @@ def analize_vector(file_name, number_of_combinations):
 
         success1 = 0
         success2 = 0
-        success1_f = 0
-        success2_f = 0
+        # success1_f = 0
+        # success2_f = 0
 
         for i in range(number_of_combinations):
             # get random combinations from vectors
@@ -64,7 +85,7 @@ def analize_vector(file_name, number_of_combinations):
             # create lattice M with usage created blocks according to Regev algorithm
             M = np.block([
                 [I_d, zeros_d_d4],
-                [np.matrix(w_d4_d), I_d4_d4_delta],
+                [np.matrix(w_d4_d)*(delta_inv/(2**t)), I_d4_d4_delta],
             ])
 
             # make LLL algorithm on columns of lattice M
@@ -74,8 +95,8 @@ def analize_vector(file_name, number_of_combinations):
             # create flags to count different solutions from lattice once
             s1 = 0
             s2 = 0
-            s1_f = 0
-            s2_f = 0
+            # s1_f = 0
+            # s2_f = 0
             # check if given combinations of vectors returns correct solution
 
             for i in range(d):
@@ -84,35 +105,35 @@ def analize_vector(file_name, number_of_combinations):
                 for j in range(d):
                     square *= pow(a_root[j], (M_LLL_t[i][j]), N)
                     square %= N
-                    if M_LLL_t[i][j] < 0:
-                        f = 1
+                    # if M_LLL_t[i][j] < 0:
+                    #     f = 1
                 if (square*square) % N == 1 and f == 0:
                     s1 = 1
                     if square != N - 1 and square != 1:
                         s2 = 1
-                if (square*square) % N == 1 and f == 1:
-                    s1_f = 1
-                    if square != N-1 and square != 1:
-                        s2_f = 1
+                # if (square*square) % N == 1 and f == 1:
+                #     s1_f = 1
+                #     if square != N-1 and square != 1:
+                #         s2_f = 1
 
             if s1 == 1:
                 success1 += 1
-            elif s1_f == 1:
-                success1_f += 1
+            # elif s1_f == 1:
+            #     success1_f += 1
 
             if s2 == 1:
                 success2 += 1
-            elif s2_f == 1:
-                success2_f += 1
+            # elif s2_f == 1:
+            #     success2_f += 1
 
 
         print(f'Per cent of combinations (with positive values of result vector) that gives % N = 1: {success1*100/number_of_combinations}%')
         print(f'Per cent of combinations (with positive values of result vector) that give p and q: {success2*100/number_of_combinations}%')
 
-        print(
-            f'Per cent of combinations (including negative values) that gives % N = 1: {(success1_f + success1) * 100 / number_of_combinations}%')
-        print(
-            f'Per cent of combinations (including negative values) that give p and q: {(success2_f + success2)* 100 / number_of_combinations}%')
+        # print(
+        #     f'Per cent of combinations (including negative values) that gives % N = 1: {(success1_f + success1) * 100 / number_of_combinations}%')
+        # print(
+        #     f'Per cent of combinations (including negative values) that give p and q: {(success2_f + success2)* 100 / number_of_combinations}%')
         # print(f'Successful vectors {successful_vectors}')
         # unsuccessful_vectors = vectors
         # for v in successful_vectors:
@@ -124,6 +145,7 @@ def analize_vector(file_name, number_of_combinations):
 
 # A = np.identity(3)
 # olll.reduction(A, 0.75)
-for number in [21, 33, 35, 39, 51, 55, 57]:
+# , 21, 33, 35, 39, 51, 55, 57]
+for number in [15, 21, 33, 35, 39, 51, 55, 57]:
     print(number)
-    analize_vector(f"./quantum_part/ceil_ceil/N_{number}", 1000)
+    analize_vector(f"./quantum_part/ceil_ceil/N_{number}", 10)
