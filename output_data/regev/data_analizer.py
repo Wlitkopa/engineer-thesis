@@ -43,7 +43,7 @@ def analize_vector(file_name, number_of_combinations):
                 vectors.append(ast.literal_eval(v))
 
         # calculate parameters necessary to create lattice
-        m = math.ceil(n/d) + 1
+        m = math.ceil(n/d) + 4
         powers = []
         for i in range(m):
             powers.append(i)
