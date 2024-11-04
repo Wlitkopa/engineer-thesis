@@ -83,7 +83,7 @@ def analize_vector(file_name, number_of_combinations):
         # success1_f = 0
         # success2_f = 0
 
-        for i in range(number_of_combinations):
+        for _ in range(number_of_combinations):
             # get random combinations from vectors
             shuffle(vectors)
             w_d4_d = vectors[:d+4]
@@ -153,4 +153,4 @@ def analize_vector(file_name, number_of_combinations):
 # olll.reduction(A, 0.75)
 #[15, 21, 33, 35, 39, 51, 55, 57]
 for number in [15, 21, 33, 35, 39, 51, 55, 57]:
-    analize_vector(f"./quantum_part/ceil_ceil/N_{number}", 100)
+    analize_vector(f"./quantum_part/ceil_ceil/N_{number}", 10000)
