@@ -53,11 +53,191 @@ class Regev(ABC):
         self.vectors = []
 
 
-    def run_all_algorithm(self):
+    def run_all_algorithm(self, Ns, d_qd_list, number_of_combinations, find_pq=False):
+        for i in range(len(d_qd_list)):
+            d_ceil_bool = d_qd_list[i][0]
+            qd_ceil_bool = d_qd_list[i][1]
+
+            for j in range(len(Ns)):
+
+                N = Ns[j]
+                print(f"\nN: {N}")
+
+                start = time.time()
+                quantum_result = self.get_vectors(N, d_ceil=d_ceil_bool, qd_ceil=qd_ceil_bool, semi_classical=False)
+                classic_result = self.run_classical_part(number_of_combinations, N, quantum_result.n, quantum_result.number_of_primes, quantum_result.exp_register_width, quantum_result.squared_primes, quantum_result.output_data)
+                end = time.time()
+                exec_time = (end - start) * (10 ** 3)
+                converted_time = convert_milliseconds(exec_time)
         pass
 
-    def run_classical_part(self):
+
+    def run_classical_part(self, number_of_combinations, N, n, d, qd, a, output_data, find_pq=False):
+
+        # start = time.time()
+        result = ""
+        vectors = []
+        p_q_vectors = []
+        a_root = []
+
+        # TODO: rozszerzyć klasę RegevResult o elementy z run_classical_part i zapisać w nich wyniki działania tej metody
+
+        for a_ in a:
+            a_root.append(int(math.sqrt(a_)))
+
+        # TODO: zmienić ten fragment kodu (poniższe 6 linijek) na taki, który nie wykorzystuje pliku a argument 'output_data'
+        # read vectors from file
+        while (line := results.readline()) != '\n':
+            v = line.split(':')[1][:-2]
+            duplicate = int(line.split(' ')[2])
+            for i in range(min(d + 4, duplicate)):
+                vectors.append(ast.literal_eval(v))
+
+        n = N.bit_length()
+        # calculate parameters necessary to create lattice
+        m = math.ceil(n / d) + 2
+        powers = []
+        for i in range(m):
+            powers.append(i)
+
+        T = N
+
+        for p in itertools.product(powers, repeat=d):
+            if p == (0,) * d:
+                # print("UWAGA:", p)
+                continue
+            T_tmp = 1
+            v_len_tmp = 1
+            for i in range(d):
+                T_tmp *= pow(a_root[i], p[i], N)
+                v_len_tmp += pow(p[i], 2)
+            v_len_tmp = math.ceil(math.sqrt(v_len_tmp))
+            # print(p, T_tmp, v_len_tmp)
+            if T_tmp % N == 1 and v_len_tmp < T:
+                # print(a_root)
+                # print(p)
+                # print(v_len_tmp)
+                T = v_len_tmp
+
+        # print('T', T)
+        R = math.ceil(6 * T * math.sqrt((d + 5) * (2 * d) + 4) * (d / 2) * (2 ** ((qd + 1) / (d + 4) + d + 2)))
+        t = 1 + math.ceil(math.log(math.sqrt(d) * R, 2))
+        delta = math.sqrt(d / 2) / R
+        delta_inv = math.ceil(R / math.sqrt(d / 2))
+        print(f"Parameters:\nN: {N}\nR: {R}\nT: {T}\nt: {t}\ndelta: {delta}\ndelta_inv: {delta_inv}")
+
+        result += (f"N: {N}\n"
+                   f"n: {n}\n"
+                   f"number_of_primes (d): {d}\n"
+                   f"exp_register_width (qd): {qd}\n"
+                   f"primes: {a_root}\n\n"
+                   f"R: {R}\n"
+                   f"T: {T}\n"
+                   f"t: {t}\n"
+                   f"delta: {delta}\n"
+                   f"delta_inv: {delta_inv}")
+
+        # create block of lattice
+        I_d = np.identity(d)
+        zeros_d_d4 = np.zeros((d, d + 4))
+        I_d4_d4_delta = delta_inv * np.identity(d + 4)
+
+        success1 = 0
+        success2 = 0
+        # success1_f = 0
+        # success2_f = 0
+
+        for _ in range(number_of_combinations):
+            # get random combinations from vectors
+            shuffle(vectors)
+            w_d4_d = vectors[:d + 4]
+            # create lattice M with usage created blocks according to Regev algorithm
+            M = np.block([
+                [I_d, zeros_d_d4],
+                [np.matrix(w_d4_d) * (delta_inv / (2 ** t)), I_d4_d4_delta],
+            ])
+
+            # make LLL algorithm on columns of lattice M
+            M_LLL = olll.reduction(M.transpose().tolist(), 0.75)
+            M_LLL_t = np.matrix(M_LLL).transpose().tolist()
+
+            # create flags to count different solutions from lattice once
+            s1 = 0
+            s2 = 0
+            # s1_f = 0
+            # s2_f = 0
+            # check if given combinations of vectors returns correct solution
+
+            for i in range(d):
+                square = 1
+                f = 0
+                temp_vector = []
+                for j in range(d):
+                    square *= pow(a_root[j], (M_LLL_t[i][j]), N)
+                    square %= N
+                    temp_vector.append(M_LLL_t[i][j])
+                    # if M_LLL_t[i][j] < 0:
+                    #     f = 1
+                if (square * square) % N == 1 and f == 0:
+                    s1 = 1
+                    if square != N - 1 and square != 1:
+                        s2 = 1
+                        # TODO: wyjść na dobre z tych pętli tak, żeby od razu iść zwrócić wektor (lub też wyliczyć p i q jeżeli find_pq=True)
+                        p_q_vectors.append(temp_vector)
+                        break
+                # if (square*square) % N == 1 and f == 1:
+                #     s1_f = 1
+                #     if square != N-1 and square != 1:
+                #         s2_f = 1
+
+            if s1 == 1:
+                success1 += 1
+            # elif s1_f == 1:
+            #     success1_f += 1
+
+            if s2 == 1:
+                success2 += 1
+            # elif s2_f == 1:
+            #     success2_f += 1
+
+        # end = time.time()
+        # exec_time = (end - start) * (10 ** 3)
+        # converted_time = convert_milliseconds(exec_time)
+        #
+        # result += (
+        #     f"Percent of combinations (with positive values of result vector) that gives % N = 1: {success1 * 100 / number_of_combinations}%\n"
+        #     f"Percent of combinations (with positive values of result vector) that give p and q: {success2 * 100 / number_of_combinations}%\n"
+        #     # f"Percent of combinations (including negative values) that gives % N = 1: {(success1_f + success1) * 100 / number_of_combinations}%\n"
+        #     # f"Percent of combinations (including negative values) that give p and q: {(success2_f + success2) * 100 / number_of_combinations}%\n"
+        #     # f"Unsuccessful vectors {unsuccessful_vectors}\n"
+        #     # f"Successful vectors {successful_vectors}\n"
+        #     f"Vectors that gives p and q: {p_q_vectors}\n"
+        #     f"\nexec_time (ms): {exec_time} ms\n"
+        #     f"exec_time: {converted_time}")
+
+        # file = open(f"output_data/regev/classical_part/file_analysis/{dir1_part}_{dir2_part}/N_{N}", "w")
+        # file.write(result)
+        # file.close()
+        #
+        # print(
+        #     f'Per cent of combinations (with positive values of result vector) that gives % N = 1: {success1 * 100 / number_of_combinations}%')
+        # print(
+        #     f'Per cent of combinations (with positive values of result vector) that give p and q: {success2 * 100 / number_of_combinations}%')
+        # # print(f'Percent of combinations (including negative values) that gives % N = 1: {(success1_f + success1) * 100 / number_of_combinations}%')
+        # # print(f'Percent of combinations (including negative values) that give p and q: {(success2_f + success2) * 100 / number_of_combinations}%')
+        # print(f"Vectors that gives p and q: {p_q_vectors}")
+        # print(f"\nexec_time: {exec_time} ms")
+        # print(f"exec_time: {converted_time}")
+
+        # TODO: Finish code below
+        if find_pq:
+            vector = p_q_vectors[0]
+            p, q = self.get_factors(vector, a_root, N)
+            pass
+
         pass
+
+
 
     def run_quantum_part(self, Ns, d_qd_list):
 
@@ -127,8 +307,7 @@ class Regev(ABC):
 
         result = ""
         vectors = []
-        p_q_positive_vectors = []
-        p_q_negative_vectors = []
+        p_q_vectors = []
 
         dir1_part = file_name.split("/")[-2].split("_")[0]
         dir2_part = file_name.split("/")[-2].split("_")[1]
@@ -143,6 +322,8 @@ class Regev(ABC):
                 line = results.readline()
                 if i == 0:
                     N = int(line.split(' ')[1])
+                if i == 1:
+                    n = int(line.split(' ')[1])
                 if i == 4:
                     d = int(line.split(':')[1][:-1])
                 if i == 5:
@@ -161,11 +342,46 @@ class Regev(ABC):
                     vectors.append(ast.literal_eval(v))
 
             # calculate parameters necessary to create lattice
-            T = 2
+            m = math.ceil(n / d) + 2
+            powers = []
+            for i in range(m):
+                powers.append(i)
+
+            T = N
+
+            for p in itertools.product(powers, repeat=d):
+                if p == (0,) * d:
+                    # print("UWAGA:", p)
+                    continue
+                T_tmp = 1
+                v_len_tmp = 1
+                for i in range(d):
+                    T_tmp *= pow(a_root[i], p[i], N)
+                    v_len_tmp += pow(p[i], 2)
+                v_len_tmp = math.ceil(math.sqrt(v_len_tmp))
+                # print(p, T_tmp, v_len_tmp)
+                if T_tmp % N == 1 and v_len_tmp < T:
+                    # print(a_root)
+                    # print(p)
+                    # print(v_len_tmp)
+                    T = v_len_tmp
+            # print('T', T)
             R = math.ceil(6 * T * math.sqrt((d + 5) * (2 * d) + 4) * (d / 2) * (2 ** ((dq + 1) / (d + 4) + d + 2)))
             t = 1 + math.ceil(math.log(math.sqrt(d) * R, 2))
             delta = math.sqrt(d / 2) / R
-            delta_inv = R / math.sqrt(d / 2)
+            delta_inv = math.ceil(R / math.sqrt(d / 2))
+            print(f"Parameters:\nN: {N}\nR: {R}\nT: {T}\nt: {t}\ndelta: {delta}\ndelta_inv: {delta_inv}")
+
+            result += (f"N: {N}\n"
+                       f"n: {n}\n"
+                       f"number_of_primes (d): {d}\n"
+                       f"exp_register_width (qd): {dq}\n"
+                       f"primes: {a_root}\n\n"
+                       f"R: {R}\n"
+                       f"T: {T}\n"
+                       f"t: {t}\n"
+                       f"delta: {delta}\n"
+                       f"delta_inv: {delta_inv}")
 
             # create block of lattice
             I_d = np.identity(d)
@@ -174,17 +390,17 @@ class Regev(ABC):
 
             success1 = 0
             success2 = 0
-            success1_f = 0
-            success2_f = 0
+            # success1_f = 0
+            # success2_f = 0
 
-            for i in range(number_of_combinations):
+            for _ in range(number_of_combinations):
                 # get random combinations from vectors
                 shuffle(vectors)
                 w_d4_d = vectors[:d + 4]
                 # create lattice M with usage created blocks according to Regev algorithm
                 M = np.block([
                     [I_d, zeros_d_d4],
-                    [np.matrix(w_d4_d), I_d4_d4_delta],
+                    [np.matrix(w_d4_d) * (delta_inv / (2 ** t)), I_d4_d4_delta],
                 ])
 
                 # make LLL algorithm on columns of lattice M
@@ -194,38 +410,41 @@ class Regev(ABC):
                 # create flags to count different solutions from lattice once
                 s1 = 0
                 s2 = 0
-                s1_f = 0
-                s2_f = 0
+                # s1_f = 0
+                # s2_f = 0
                 # check if given combinations of vectors returns correct solution
 
                 for i in range(d):
                     square = 1
                     f = 0
+                    temp_vector = []
                     for j in range(d):
                         square *= pow(a_root[j], (M_LLL_t[i][j]), N)
                         square %= N
-                        if M_LLL_t[i][j] < 0:
-                            f = 1
+                        temp_vector.append(M_LLL_t[i][j])
+                        # if M_LLL_t[i][j] < 0:
+                        #     f = 1
                     if (square * square) % N == 1 and f == 0:
                         s1 = 1
                         if square != N - 1 and square != 1:
                             s2 = 1
-                            p_q_positive_vectors.append(str(v))
-                    if (square * square) % N == 1 and f == 1:
-                        s1_f = 1
-                        if square != N - 1 and square != 1:
-                            s2_f = 1
-                            p_q_negative_vectors.append(str(v))
+                            p_q_vectors.append(temp_vector)
+                            break
+                    # if (square*square) % N == 1 and f == 1:
+                    #     s1_f = 1
+                    #     if square != N-1 and square != 1:
+                    #         s2_f = 1
 
                 if s1 == 1:
                     success1 += 1
-                elif s1_f == 1:
-                    success1_f += 1
+                # elif s1_f == 1:
+                #     success1_f += 1
 
                 if s2 == 1:
                     success2 += 1
-                elif s2_f == 1:
-                    success2_f += 1
+                # elif s2_f == 1:
+                #     success2_f += 1
+
 
         end = time.time()
         exec_time = (end - start) * (10 ** 3)
@@ -233,12 +452,11 @@ class Regev(ABC):
 
         result += (f"Percent of combinations (with positive values of result vector) that gives % N = 1: {success1 * 100 / number_of_combinations}%\n"
                    f"Percent of combinations (with positive values of result vector) that give p and q: {success2 * 100 / number_of_combinations}%\n"
-                   f"Percent of combinations (including negative values) that gives % N = 1: {(success1_f + success1) * 100 / number_of_combinations}%\n"
-                   f"Percent of combinations (including negative values) that give p and q: {(success2_f + success2) * 100 / number_of_combinations}%\n"
+                   # f"Percent of combinations (including negative values) that gives % N = 1: {(success1_f + success1) * 100 / number_of_combinations}%\n"
+                   # f"Percent of combinations (including negative values) that give p and q: {(success2_f + success2) * 100 / number_of_combinations}%\n"
                    # f"Unsuccessful vectors {unsuccessful_vectors}\n"
                    # f"Successful vectors {successful_vectors}\n"
-                   f"Vectors that gives p and q (with positive values): {p_q_positive_vectors}\n"
-                   f"Vectors that gives p and q (with negative values): {p_q_negative_vectors}"
+                   f"Vectors that gives p and q: {p_q_vectors}\n"
                    f"\nexec_time (ms): {exec_time} ms\n"
                    f"exec_time: {converted_time}")
 
@@ -247,17 +465,18 @@ class Regev(ABC):
         file.write(result)
         file.close()
 
-        print(f'Percent of combinations (with positive values of result vector) that gives % N = 1: {success1 * 100 / number_of_combinations}%')
-        print(f'Percent of combinations (with positive values of result vector) that give p and q: {success2 * 100 / number_of_combinations}%')
-        print(f'Percent of combinations (including negative values) that gives % N = 1: {(success1_f + success1) * 100 / number_of_combinations}%')
-        print(f'Percent of combinations (including negative values) that give p and q: {(success2_f + success2) * 100 / number_of_combinations}%')
-        print(f"Vectors that gives p and q (with positive values): {p_q_positive_vectors}")
-        print(f"Vectors that gives p and q (with negative values): {p_q_negative_vectors}")
-        print(f"\nexec_time (ms): {exec_time} ms")
+        print(f'Per cent of combinations (with positive values of result vector) that gives % N = 1: {success1 * 100 / number_of_combinations}%')
+        print(f'Per cent of combinations (with positive values of result vector) that give p and q: {success2 * 100 / number_of_combinations}%')
+        # print(f'Percent of combinations (including negative values) that gives % N = 1: {(success1_f + success1) * 100 / number_of_combinations}%')
+        # print(f'Percent of combinations (including negative values) that give p and q: {(success2_f + success2) * 100 / number_of_combinations}%')
+        print(f"Vectors that gives p and q: {p_q_vectors}")
+        print(f"\nexec_time: {exec_time} ms")
         print(f"exec_time: {converted_time}")
 
-        print(f"exec_time: {exec_time}ms")
-        print(f"converted_time: {converted_time}")
+        # This code is temporary, needs to be deleted
+        print(f"CALCULATING P AND Q")
+        vector = p_q_vectors[0]
+        self.get_factors(vector, a_root, N)
 
 
     def run_file_data_analyzer_old(self, file_name):
@@ -362,6 +581,7 @@ class Regev(ABC):
                     square %= N
                 if (square * square) % N == 1:
                     break
+
             if (square * square) % N == 1:
                 success1 += 1
                 if square != N - 1 and square != 1:
@@ -426,7 +646,10 @@ class Regev(ABC):
             # print(f", measurment: {measurement}   |   shots: {shots}", end="")
             vector = convert_measurement(measurement)
             self.result.output_data.append([vector, measurement, shots])
+
+            # The following two lines might be useless
             self.vectors.append(vector)
+            self.result.vectors.append(vector)
 
             self.result.successful_counts += 1
             self.result.successful_shots += shots
@@ -583,15 +806,16 @@ class Regev(ABC):
         return circuit
 
 
-    def get_factors(self, vect, t_a, t_N):
-        a = self.result.squared_primes
-        N = self.result.N
-        # a = t_a
-        # N = t_N
+    def get_factors(self, vect, primes, N):
+
+        print(f"squared_primes = {primes}\n"
+              f"vect: {vect}\n")
+
         prod = Decimal(1)
-        for i in range(len(a)):
-            sqrt_a = Decimal(a[i]).sqrt()
-            pow_a = ((sqrt_a ** vect[i]) % N)
+
+        for i in range(len(primes)):
+            # sqrt_a = Decimal(primes[i]).sqrt()
+            pow_a = ((Decimal(primes[i]) ** vect[i]) % N)
             prod = ((prod*pow_a) % N)
 
         print(f"prod: {prod}")
@@ -611,6 +835,8 @@ class Regev(ABC):
             return -1
 
         q = int(N/p)
+
+        print(f"p: {p}\nq: {q}")
 
         return p, q
 
@@ -696,6 +922,7 @@ class RegevResult:
         self._exp_register_width = 0
         self._squared_primes = []
         self._output_data = []
+        self._vectors = []
 
 
     @property
@@ -803,6 +1030,15 @@ class RegevResult:
     @output_data.setter
     def output_data(self, value: []) -> None:
         self._output_data = value
+
+    @property
+    def vectors(self) -> []:
+        return self._vectors
+
+    @vectors.setter
+    def vectors(self, value: []) -> None:
+        self._vectors = value
+
 
 
 

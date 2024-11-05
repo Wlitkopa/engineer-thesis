@@ -1,8 +1,16 @@
-Percent of combinations (with positive values of result vector) that gives % N = 1: 22.0%
-Percent of combinations (with positive values of result vector) that give p and q: 22.0%
-Percent of combinations (including negative values) that gives % N = 1: 36.0%
-Percent of combinations (including negative values) that give p and q: 34.0%
-Vectors that gives p and q (with positive values): [' [28, 4, 24]', ' [28, 4, 24]', ' [28, 4, 24]', ' [28, 4, 24]', ' [28, 4, 24]', ' [28, 4, 24]', ' [28, 4, 24]', ' [28, 4, 24]', ' [28, 4, 24]', ' [28, 4, 24]', ' [28, 4, 24]']
-Vectors that gives p and q (with negative values): [' [28, 4, 24]', ' [28, 4, 24]', ' [28, 4, 24]', ' [28, 4, 24]', ' [28, 4, 24]', ' [28, 4, 24]', ' [28, 4, 24]']
-exec_time (ms): 25033.087968826294 ms
-exec_time: 25s 33.087968826293945ms
+N: 51
+n: 6
+number_of_primes (d): 3
+exp_register_width (qd): 5
+primes: [2, 5, 7]
+
+R: 11287
+T: 3
+t: 16
+delta: 0.00010850933564202967
+delta_inv: 9216Percent of combinations (with positive values of result vector) that gives % N = 1: 32.0%
+Percent of combinations (with positive values of result vector) that give p and q: 26.0%
+Vectors that gives p and q: [[0, 1, 1], [1, 1, -1], [1, 1, -1], [0, 1, 1], [0, 1, 1], [0, 1, 1], [0, 1, 1], [1, 1, -1], [1, 1, -1], [1, 1, -1], [1, 1, -1], [0, 1, 1], [0, 1, 1]]
+
+exec_time (ms): 22978.432416915894 ms
+exec_time: 22s 978.4324169158936ms
