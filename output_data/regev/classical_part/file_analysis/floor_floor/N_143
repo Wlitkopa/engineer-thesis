@@ -1,0 +1,16 @@
+N: 143
+n: 8
+number_of_primes (d): 2
+exp_register_width (qd): 6
+primes: [2, 3]
+
+R: 6096
+T: 5
+t: 15
+delta: 0.00016404199475065617
+delta_inv: 6096Percent of combinations (with positive values of result vector) that gives % N = 1: 0.2%
+Percent of combinations (with positive values of result vector) that give p and q: 0.2%
+Vectors that gives p and q: [[-2, -1], [-2, -1]]
+
+exec_time (ms): 237772.14121818542 ms
+exec_time: 3m 57s 772.1412181854248ms

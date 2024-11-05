@@ -1,0 +1,16 @@
+N: 95
+n: 7
+number_of_primes (d): 2
+exp_register_width (qd): 5
+primes: [2, 3]
+
+R: 6517
+T: 6
+t: 15
+delta: 0.00015344483658124905
+delta_inv: 6517Percent of combinations (with positive values of result vector) that gives % N = 1: 0.0%
+Percent of combinations (with positive values of result vector) that give p and q: 0.0%
+Vectors that gives p and q: []
+
+exec_time (ms): 205678.08389663696 ms
+exec_time: 3m 25s 678.0838966369629ms

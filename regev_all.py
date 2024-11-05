@@ -17,8 +17,8 @@ d_qd_list = [[False, False]]
 
 # Analysing data from a quantum part output file (new version)
 # file_name = "/home/koan/myHome/AGH/PracaInżynierska/pycharm_github/shor_mmik/output_data/regev/quantum_part/ceil_ceil/N_51"
-Ns = [15, 21, 33, 35, 39, 51, 55, 57]
-d_qd_list = [[True, True], [True, False], [False, True], [False, False]]
+Ns = [143]
+d_qd_list = [[False, False]]
 number_of_combinations = 1000
 regev.run_file_data_analyzer_new(Ns, d_qd_list, number_of_combinations)
 
