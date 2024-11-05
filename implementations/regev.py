@@ -17,11 +17,11 @@ from utils.convert_milliseconds import convert_milliseconds
 import logging
 import math
 import olll
-from random import shuffle
+from random import shuffle, randint
 from fractions import Fraction
 from decimal import Decimal, getcontext
 import time
-from utils.secrets import ibm_api_token
+# from utils.secrets import ibm_api_token
 
 
 # Importy z data_analizer.py
@@ -326,7 +326,7 @@ class Regev(ABC):
                 N = Ns[j]
                 print("=============================================")
                 print(f"\nN: {N}")
-                file_name = f"/home/koan/myHome/AGH/PracaInżynierska/pycharm_github/shor_mmik/output_data/regev/quantum_part/{d_mode}_{qd_mode}/N_{N}"
+                file_name = f"/home/reny/PycharmProjects/regev/engineer-thesis/output_data/regev/quantum_part/{d_mode}_{qd_mode}/N_{N}"
 
                 if not os.path.exists(file_name):
                     print(f"File {file_name} doesn't exists")
@@ -362,27 +362,28 @@ class Regev(ABC):
                             for a_ in a:
                                 a_root.append(int(math.sqrt(a_)))
 
-                # read vectors from file or generate vectors
-                total_number_of_vectors = 0
-                while (line := results.readline()) != '\n':
-                    v = line.split(':')[1][:-2]
-                    duplicate = int(line.split(' ')[2])
-                    if type_of_test == 1:
-                        for i in range(duplicate):
+                    # read vectors from file or generate vectors
+                    total_number_of_vectors = 0
+                    while (line := results.readline()) != '\n':
+                        v = line.split(':')[1][:-2]
+                        duplicate = int(line.split(' ')[2])
+                        if type_of_test == 1:
+                            for i in range(duplicate):
+                                vectors.append(ast.literal_eval(v))
+                        if type_of_test == 2:
                             vectors.append(ast.literal_eval(v))
-                    if type_of_test == 2:
-                        vectors.append(ast.literal_eval(v))
+                        if type_of_test == 3:
+                            total_number_of_vectors += duplicate
                     if type_of_test == 3:
-                        total_number_of_vectors += duplicate
-                if type_of_test == 3:
-                    for i in range(total_number_of_vectors):
-                        v = []
-                        for j in range(d):
-                            v.append(randint(0, 2**dq))
-                        vectors.append(v)
-                if type_of_test == 2 and len(vectors) < d+4:
-                    result += f"\nToo little variety of vectors for number {N}\n"
-                    return
+                        for i in range(total_number_of_vectors):
+                            v = []
+                            for j in range(d):
+                                v.append(randint(0, 2**dq))
+                            vectors.append(v)
+                    if type_of_test == 2 and len(vectors) < d+4:
+                        print(f"\nToo little variety of vectors for number {N}\n")
+                        result += f"\nToo little variety of vectors for number {N}\n"
+                        continue
 
 
                     start = time.time()
@@ -416,9 +417,10 @@ class Regev(ABC):
                     t = 1 + math.ceil(math.log(math.sqrt(d) * R, 2))
                     delta = math.sqrt(d / 2) / R
                     delta_inv = math.ceil(R / math.sqrt(d / 2))
-                    print(f"Parameters:\nN: {N}\nR: {R}\nT: {T}\nt: {t}\ndelta: {delta}\ndelta_inv: {delta_inv}")
+                    print(f"Parameters:\nN: {N}\ntype_of_test: {type_of_test}\nR: {R}\nT: {T}\nt: {t}\ndelta: {delta}\ndelta_inv: {delta_inv}")
 
                     result += (f"N: {N}\n"
+                               f"type_of_test: {type_of_test}\n"
                                f"n: {n}\n"
                                f"number_of_primes (d): {d}\n"
                                f"exp_register_width (qd): {dq}\n"
