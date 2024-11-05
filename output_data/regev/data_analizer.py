@@ -4,10 +4,17 @@ import math
 import olll
 import itertools
 import numpy as np
-from random import shuffle
+from random import shuffle, randint
 
 
-def analize_vector(file_name, number_of_combinations):
+def analize_vector(file_name, number_of_combinations, type_of_test):
+    # Type of test
+    # 1 - deafult, check number_of_combinations random combinations of vectors return by quantum computer if returns
+    # correct powers, with probability according to this returned by quantum computer
+    # 2 - check number_of_combinations random combinations of vectors return by quantum computer if returns
+    # correct powers, but do not count fact that some vectors are replicated
+    # 3 - check number_of_combinations random combinations of totally random vectors if returns
+    # correct powers
     np.set_printoptions(suppress=True)
     if not os.path.exists(file_name):
         print(f"File {file_name} doesn't exists")
@@ -35,12 +42,28 @@ def analize_vector(file_name, number_of_combinations):
                 for a_ in a:
                     a_root.append(int(math.sqrt(a_)))
 
-        # read vectors from file
+        # read vectors from file or generate vectors
+        total_number_of_vectors = 0
         while (line := results.readline()) != '\n':
             v = line.split(':')[1][:-2]
             duplicate = int(line.split(' ')[2])
-            for i in range(min(d+4, duplicate)):
+            if type_of_test == 1:
+                for i in range(duplicate):
+                    vectors.append(ast.literal_eval(v))
+            if type_of_test == 2:
                 vectors.append(ast.literal_eval(v))
+            if type_of_test == 3:
+                total_number_of_vectors += duplicate
+        if type_of_test == 3:
+            for i in range(total_number_of_vectors):
+                v = []
+                for j in range(d):
+                    v.append(randint(0, 2**dq))
+                vectors.append(v)
+        if type_of_test == 2 and len(vectors) < d+4:
+            print("Too little variety of vectors")
+            return
+
 
         # calculate parameters necessary to create lattice
         m = math.ceil(n/d) + 2
@@ -133,8 +156,8 @@ def analize_vector(file_name, number_of_combinations):
             #     success2_f += 1
 
 
-        print(f'Per cent of combinations (with positive values of result vector) that gives % N = 1: {success1*100/number_of_combinations}%')
-        print(f'Per cent of combinations (with positive values of result vector) that give p and q: {success2*100/number_of_combinations}%')
+        print(f'Per cent of combinations that give % N = 1: {success1*100/number_of_combinations}%')
+        print(f'Per cent of combinations that give p and q: {success2*100/number_of_combinations}%')
 
         # print(
         #     f'Per cent of combinations (including negative values) that gives % N = 1: {(success1_f + success1) * 100 / number_of_combinations}%')
@@ -152,5 +175,5 @@ def analize_vector(file_name, number_of_combinations):
 # A = np.identity(3)
 # olll.reduction(A, 0.75)
 #[15, 21, 33, 35, 39, 51, 55, 57]
-for number in [15, 21, 33, 35, 39, 51, 55, 57]:
-    analize_vector(f"./quantum_part/ceil_ceil/N_{number}", 10000)
+for number in [21]:
+    analize_vector(f"./quantum_part/ceil_ceil/N_{number}", 100, 3)
