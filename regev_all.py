@@ -16,7 +16,7 @@ N = 21
 d_ceil = True
 qd_ceil = False
 decompose = False
-# regev.draw_quantum_circuit(N, d_ceil, qd_ceil, decompose)
+regev.draw_quantum_circuit(N, d_ceil, qd_ceil, decompose)
 
 # Run all algorithm
 Ns = [15, 21]
@@ -38,7 +38,7 @@ Ns = [15, 21, 33, 35, 39, 51, 55, 57]
 d_qd_list = [[True, True], [True, False], [False, True], [False, False]]
 number_of_combinations = 1000
 type_of_test = 2
-regev.run_file_data_analyzer_new(Ns, d_qd_list, number_of_combinations, type_of_test)
+# regev.run_file_data_analyzer_new(Ns, d_qd_list, number_of_combinations, type_of_test)
 
 
 # Run on IBM quantum computer

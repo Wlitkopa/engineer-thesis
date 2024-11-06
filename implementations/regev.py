@@ -56,9 +56,10 @@ class Regev(ABC):
     def draw_quantum_circuit(self, N, d_ceil, qd_ceil, decompose=False):
         circuit = self.construct_circuit(N, d_ceil, qd_ceil)
         if decompose:
-            circuit.decompose().draw(output='mpl', fold=-1)
+            circuit.decompose().draw(output='mpl', filename=f'circuit_decompose_{d_ceil}_{qd_ceil}_{N}.png', style='iqp-dark')
+            print(circuit.decompose())
         else:
-            circuit.draw(output='mpl', fold=-1)
+            circuit.draw(output='mpl', filename=f'circuit_{d_ceil}_{qd_ceil}_{N}.png', style='iqp-dark')
 
     def run_all_algorithm(self, Ns, d_qd_list, number_of_combinations, type_of_test, find_pq=False):
         for i in range(len(d_qd_list)):
