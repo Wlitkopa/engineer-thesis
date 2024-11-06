@@ -556,7 +556,7 @@ class Regev(ABC):
                            f"exec_time: {converted_time}")
 
 
-                file = open(f"output_data/regev/classical_part/file_analysis/{dir1_part}_{dir2_part}/N_{N}", "w")
+                file = open(f"output_data/regev/classical_part/file_analysis_2/{dir1_part}_{dir2_part}/N_{N}", "w")
                 file.write(result)
                 file.close()
 
