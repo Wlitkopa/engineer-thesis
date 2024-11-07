@@ -738,6 +738,8 @@ class Regev(ABC):
         counts = aersim.run(pm, shots=self.shots).result().get_counts(0)
 
         # counts = aersim.run(isa_qc, shots=self.shots).result().get_counts(0)
+
+        # counts = aersim.run(isa_qc, shots=self.shots).result().get_counts(0)
         # counts = result.get_counts(0)
         # print('Counts(ideal):', counts)
 
