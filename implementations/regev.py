@@ -4,7 +4,7 @@ import numpy as np
 from abc import ABC, abstractmethod
 from itertools import chain, combinations
 
-from qiskit import QuantumRegister, AncillaRegister, QuantumCircuit, ClassicalRegister
+from qiskit import QuantumRegister, AncillaRegister, QuantumCircuit, ClassicalRegister, transpile
 
 from qiskit.circuit import Instruction
 from qiskit.circuit.library import QFT
@@ -675,11 +675,17 @@ class Regev(ABC):
         self._validate_input(N)
 
         circuit = self.construct_circuit(N, d_ceil, qd_ceil, semi_classical, measurement=True)
-        aersim = AerSimulator()
-        pm = generate_preset_pass_manager(backend=aersim, optimization_level=3)
-        isa_qc = pm.run(circuit)
+        circuit.draw(output='mpl', filename=f'circuit_{N}_{d_ceil}_{qd_ceil}.png')
+        aersim = AerSimulator(method="extended_stabilizer")
+        # Wyświetlenie liczby obsługiwanych kubitów
+        print("Max number of qubits (local qasm_simulator):", aersim.configuration().n_qubits)
+        # pm = generate_preset_pass_manager(backend=aersim, optimization_level=3  )
+        pm = transpile(circuit, aersim)
 
-        counts = aersim.run(isa_qc, shots=self.shots).result().get_counts(0)
+        # isa_qc = pm.run(circuit)
+        counts = aersim.run(pm, shots=self.shots).result().get_counts(0)
+
+        # counts = aersim.run(isa_qc, shots=self.shots).result().get_counts(0)
         # counts = result.get_counts(0)
         # print('Counts(ideal):', counts)
 
@@ -899,9 +905,10 @@ class Regev(ABC):
         self._validate_input(N)
         result_str = ""
 
-        QiskitRuntimeService.save_account(channel="ibm_quantum", overwrite=True, token=ibm_api_token)
+        # QiskitRuntimeService.save_account(channel="ibm_quantum", overwrite=True, token=ibm_api_token)
         service = QiskitRuntimeService()
-        backend = service.least_busy(operational=True, simulator=False, min_num_qubits=127)
+        # backend = service.least_busy(operational=True, simulator=False, min_num_qubits=127)
+        backend = service.backend("ibm_sherbrooke")
         circuit = self.construct_circuit(N, d_ceil, qd_ceil, semi_classical, measurement=True)
         print(circuit)
         print(f"Number of qubits: {circuit.num_qubits}")
