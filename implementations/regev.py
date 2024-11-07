@@ -8,6 +8,8 @@ from qiskit import QuantumRegister, AncillaRegister, QuantumCircuit, ClassicalRe
 
 from qiskit.circuit import Instruction
 from qiskit.circuit.library import QFT
+from qiskit.visualization.circuit import matplotlib
+
 from utils.circuit_creation import create_circuit
 from utils.is_prime import is_prime
 from utils.convert_measurement import convert_measurement
@@ -53,13 +55,33 @@ class Regev(ABC):
         self.vectors = []
 
 
-    def draw_quantum_circuit(self, N, d_ceil, qd_ceil, decompose=False):
-        circuit = self.construct_circuit(N, d_ceil, qd_ceil)
-        if decompose:
-            circuit.decompose().draw(output='mpl', filename=f'circuit_decompose_{d_ceil}_{qd_ceil}_{N}.png', style='iqp-dark')
-            print(circuit.decompose())
-        else:
-            circuit.draw(output='mpl', filename=f'circuit_{d_ceil}_{qd_ceil}_{N}.png', style='iqp-dark')
+    def draw_quantum_circuit(self, Ns, d_qd_list, decompose=False):
+
+        for i in range(len(d_qd_list)):
+            d_ceil_bool = d_qd_list[i][0]
+            qd_ceil_bool = d_qd_list[i][1]
+
+            for j in range(len(Ns)):
+
+                N = Ns[j]
+
+                if d_ceil_bool:
+                    d_mode = "ceil"
+                else:
+                    d_mode = "floor"
+
+                if qd_ceil_bool:
+                    qd_mode = "ceil"
+                else:
+                    qd_mode = "floor"
+
+                circuit = self.construct_circuit(N, d_ceil_bool, qd_ceil_bool)
+
+                if decompose:
+                    circuit.decompose().draw(output='mpl', filename=f'images/decomposed/{d_mode}_{qd_mode}/N_{N}.png', style='iqp-dark', fold=-1)
+                else:
+                    circuit.draw(output='mpl', filename=f'images/general/{d_mode}_{qd_mode}/N_{N}.png', style='iqp-dark', fold=-1)
+
 
     def run_all_algorithm(self, Ns, d_qd_list, number_of_combinations, type_of_test, find_pq=False):
         for i in range(len(d_qd_list)):
@@ -138,8 +160,6 @@ class Regev(ABC):
         vectors = []
         p_q_vectors = []
         a_root = []
-
-        # TODO: rozszerzyć klasę RegevResult o elementy z run_classical_part i zapisać w nich wyniki działania tej metody
 
         start = time.time()
 
