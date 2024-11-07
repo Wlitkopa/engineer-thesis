@@ -8,9 +8,9 @@ R: 6096
 T: 5
 t: 15
 delta: 0.00016404199475065617
-delta_inv: 6096Percent of combinations (with positive values of result vector) that gives % N = 1: 0.2%
-Percent of combinations (with positive values of result vector) that give p and q: 0.2%
-Vectors that gives p and q: [[-2, -1], [-2, -1]]
+delta_inv: 6096Percent of combinations (with positive values of result vector) that gives % N = 1: 0.0%
+Percent of combinations (with positive values of result vector) that give p and q: 0.0%
+Vectors that gives p and q: []
 
-exec_time (ms): 237772.14121818542 ms
-exec_time: 3m 57s 772.1412181854248ms
+exec_time (ms): 2495.5170154571533 ms
+exec_time: 2s 495.5170154571533ms

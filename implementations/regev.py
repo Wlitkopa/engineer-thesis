@@ -21,7 +21,7 @@ from random import shuffle, randint
 from fractions import Fraction
 from decimal import Decimal, getcontext
 import time
-# from utils.secrets import ibm_api_token
+from utils.secrets import ibm_api_token
 
 
 # Importy z data_analizer.py
@@ -53,47 +53,121 @@ class Regev(ABC):
         self.vectors = []
 
 
-    def run_all_algorithm(self, Ns, d_qd_list, number_of_combinations, find_pq=False):
+    def draw_quantum_circuit(self, N, d_ceil, qd_ceil, decompose=False):
+        circuit = self.construct_circuit(N, d_ceil, qd_ceil)
+        if decompose:
+            circuit.decompose().draw(output='mpl', filename=f'circuit_decompose_{d_ceil}_{qd_ceil}_{N}.png', style='iqp-dark')
+            print(circuit.decompose())
+        else:
+            circuit.draw(output='mpl', filename=f'circuit_{d_ceil}_{qd_ceil}_{N}.png', style='iqp-dark')
+
+    def run_all_algorithm(self, Ns, d_qd_list, number_of_combinations, type_of_test, find_pq=False):
         for i in range(len(d_qd_list)):
             d_ceil_bool = d_qd_list[i][0]
             qd_ceil_bool = d_qd_list[i][1]
 
             for j in range(len(Ns)):
 
+                result_str = ""
                 N = Ns[j]
-                print(f"\nN: {N}")
 
+                if d_ceil_bool:
+                    d_mode = "ceil"
+                else:
+                    d_mode = "floor"
+
+                if qd_ceil_bool:
+                    qd_mode = "ceil"
+                else:
+                    qd_mode = "floor"
+
+                print(f"\nN: {N}")
                 start = time.time()
                 quantum_result = self.get_vectors(N, d_ceil=d_ceil_bool, qd_ceil=qd_ceil_bool, semi_classical=False)
-                classic_result = self.run_classical_part(number_of_combinations, N, quantum_result.n, quantum_result.number_of_primes, quantum_result.exp_register_width, quantum_result.squared_primes, quantum_result.output_data)
+                classic_result = self.run_classical_part(number_of_combinations, N, quantum_result.n, quantum_result.number_of_primes, quantum_result.exp_register_width, quantum_result.squared_primes, quantum_result.output_data, type_of_test, find_pq)
                 end = time.time()
                 exec_time = (end - start) * (10 ** 3)
                 converted_time = convert_milliseconds(exec_time)
-        pass
+
+                result_str += (f"=============== QUANTUM PART ===============\n"
+                               f"N: {quantum_result.N}\n"
+                               f"n: {quantum_result.n}\n"
+                               f"d_ceil: {quantum_result.d_ceil}\n"
+                               f"qd_ceil: {quantum_result.qd_ceil}\n"
+                               f"number_of_primes (d): {quantum_result.number_of_primes}\n"
+                               f"exp_register_width (qd): {quantum_result.exp_register_width}\n"
+                               f"squared_primes: {quantum_result.squared_primes}\n"
+                               f"output_data: {quantum_result.output_data}\n"
+                               f"\nvectors: {quantum_result}\n"
+                               f"\nquantum part exec_time (ms): {quantum_result.quantum_exec_time}ms\n"
+                               f"quantum part exec_time: {convert_milliseconds(quantum_result.quantum_exec_time)}\n")
+
+                result_str += (f"\n=============== CLASSICAL PART ===============\n"
+                               f"R: {classic_result.R}\n"
+                               f"T: {classic_result.T}\n"
+                               f"t: {classic_result.t}\n"
+                               f"delta: {classic_result.delta}\n"
+                               f"delta_inv: {classic_result.delta_inv}\n"
+                               f"type_of_test: {type_of_test}\n"
+                               f"number_of_combinations: {number_of_combinations}\n"
+                               f"\nclassical part exec_time (ms): {classic_result.classical_exec_time}ms\n"
+                               f"classical part exec_time: {convert_milliseconds(classic_result.classical_exec_time)}\n")
 
 
-    def run_classical_part(self, number_of_combinations, N, n, d, qd, a, output_data, find_pq=False):
+                result_str += f"\n=============== ALL TOGETHER ===============\n"
 
+                if find_pq:
+                    result_str += (f"p: {classic_result.p}\n"
+                                   f"q: {classic_result.q}\n")
+
+                result_str += (f"total exec_time (ms): {exec_time}ms\n"
+                              f"total exec_time: {converted_time}")
+
+                file = open(f"output_data/regev/all_parts/{d_mode}_{qd_mode}/N_{N}", "w")
+                file.write(result_str)
+                file.close()
+
+        return 0
+
+
+    def run_classical_part(self, number_of_combinations, N, n, d, qd, a, output_data, type_of_test, find_pq=False):
+
+        print("Running classical part")
         # start = time.time()
-        result = ""
+        classic_result = RegevResult()
         vectors = []
         p_q_vectors = []
         a_root = []
 
         # TODO: rozszerzyć klasę RegevResult o elementy z run_classical_part i zapisać w nich wyniki działania tej metody
 
+        start = time.time()
+
         for a_ in a:
             a_root.append(int(math.sqrt(a_)))
 
-        # TODO: zmienić ten fragment kodu (poniższe 6 linijek) na taki, który nie wykorzystuje pliku a argument 'output_data'
-        # read vectors from file
-        while (line := results.readline()) != '\n':
-            v = line.split(':')[1][:-2]
-            duplicate = int(line.split(' ')[2])
-            for i in range(min(d + 4, duplicate)):
-                vectors.append(ast.literal_eval(v))
+        # output_data[i]: [Vector, measurments, shots]
+        total_number_of_vectors = 0
+        for i in range(len(output_data)):
+            duplicate = output_data[i][2]
+            if type_of_test == 1:
+                for j in range(min(d + 4, duplicate)):
+                    vectors.append(output_data[i][0])
+            if type_of_test == 2:
+                vectors.append(output_data[i][0])
+            if type_of_test == 3:
+                total_number_of_vectors += duplicate
 
-        n = N.bit_length()
+        if type_of_test == 3:
+            for i in range(total_number_of_vectors):
+                v = []
+                for j in range(d):
+                    v.append(randint(0, 2 ** qd))
+                vectors.append(v)
+        if type_of_test == 2 and len(vectors) < d + 4:
+            print(f"\nToo little variety of vectors for number {N}\n")
+            return -1
+
         # calculate parameters necessary to create lattice
         m = math.ceil(n / d) + 2
         powers = []
@@ -126,16 +200,11 @@ class Regev(ABC):
         delta_inv = math.ceil(R / math.sqrt(d / 2))
         print(f"Parameters:\nN: {N}\nR: {R}\nT: {T}\nt: {t}\ndelta: {delta}\ndelta_inv: {delta_inv}")
 
-        result += (f"N: {N}\n"
-                   f"n: {n}\n"
-                   f"number_of_primes (d): {d}\n"
-                   f"exp_register_width (qd): {qd}\n"
-                   f"primes: {a_root}\n\n"
-                   f"R: {R}\n"
-                   f"T: {T}\n"
-                   f"t: {t}\n"
-                   f"delta: {delta}\n"
-                   f"delta_inv: {delta_inv}")
+        classic_result.R = R
+        classic_result.T = T
+        classic_result.t = t
+        classic_result.delta = delta
+        classic_result.delta_inv = delta_inv
 
         # create block of lattice
         I_d = np.identity(d)
@@ -168,6 +237,7 @@ class Regev(ABC):
             # s2_f = 0
             # check if given combinations of vectors returns correct solution
 
+            break_flag = 0
             for i in range(d):
                 square = 1
                 f = 0
@@ -184,7 +254,10 @@ class Regev(ABC):
                         s2 = 1
                         # TODO: wyjść na dobre z tych pętli tak, żeby od razu iść zwrócić wektor (lub też wyliczyć p i q jeżeli find_pq=True)
                         p_q_vectors.append(temp_vector)
+                        break_flag = 1
                         break
+                if break_flag == 1:
+                    break
                 # if (square*square) % N == 1 and f == 1:
                 #     s1_f = 1
                 #     if square != N-1 and square != 1:
@@ -200,46 +273,22 @@ class Regev(ABC):
             # elif s2_f == 1:
             #     success2_f += 1
 
-        # end = time.time()
-        # exec_time = (end - start) * (10 ** 3)
-        # converted_time = convert_milliseconds(exec_time)
-        #
-        # result += (
-        #     f"Percent of combinations (with positive values of result vector) that gives % N = 1: {success1 * 100 / number_of_combinations}%\n"
-        #     f"Percent of combinations (with positive values of result vector) that give p and q: {success2 * 100 / number_of_combinations}%\n"
-        #     # f"Percent of combinations (including negative values) that gives % N = 1: {(success1_f + success1) * 100 / number_of_combinations}%\n"
-        #     # f"Percent of combinations (including negative values) that give p and q: {(success2_f + success2) * 100 / number_of_combinations}%\n"
-        #     # f"Unsuccessful vectors {unsuccessful_vectors}\n"
-        #     # f"Successful vectors {successful_vectors}\n"
-        #     f"Vectors that gives p and q: {p_q_vectors}\n"
-        #     f"\nexec_time (ms): {exec_time} ms\n"
-        #     f"exec_time: {converted_time}")
+        end = time.time()
+        exec_time = (end - start) * (10 ** 3)
+        classic_result.classical_exec_time = exec_time
 
-        # file = open(f"output_data/regev/classical_part/file_analysis/{dir1_part}_{dir2_part}/N_{N}", "w")
-        # file.write(result)
-        # file.close()
-        #
-        # print(
-        #     f'Per cent of combinations (with positive values of result vector) that gives % N = 1: {success1 * 100 / number_of_combinations}%')
-        # print(
-        #     f'Per cent of combinations (with positive values of result vector) that give p and q: {success2 * 100 / number_of_combinations}%')
-        # # print(f'Percent of combinations (including negative values) that gives % N = 1: {(success1_f + success1) * 100 / number_of_combinations}%')
-        # # print(f'Percent of combinations (including negative values) that give p and q: {(success2_f + success2) * 100 / number_of_combinations}%')
-        # print(f"Vectors that gives p and q: {p_q_vectors}")
-        # print(f"\nexec_time: {exec_time} ms")
-        # print(f"exec_time: {converted_time}")
+        classic_result.vector = p_q_vectors[0]
 
-        # TODO: Finish code below
         if find_pq:
             vector = p_q_vectors[0]
             p, q = self.get_factors(vector, a_root, N)
-            pass
+            classic_result.p = p
+            classic_result.q = q
 
-        pass
+        return classic_result
 
 
-
-    def run_quantum_part(self, Ns, d_qd_list):
+    def run_quantum_part_data_collection(self, Ns, d_qd_list):
 
         for i in range(len(d_qd_list)):
             d_ceil_bool = d_qd_list[i][0]
@@ -321,12 +370,11 @@ class Regev(ABC):
             else:
                 qd_mode = "floor"
 
-            for j in range(len(Ns)):
+            for l in range(len(Ns)):
 
-                N = Ns[j]
-                print("=============================================")
+                N = Ns[l]
                 print(f"\nN: {N}")
-                file_name = f"/home/reny/PycharmProjects/regev/engineer-thesis/output_data/regev/quantum_part/{d_mode}_{qd_mode}/N_{N}"
+                file_name = f"/home/koan/myHome/AGH/PracaInżynierska/pycharm_github/shor_mmik/output_data/regev/quantum_part/{d_mode}_{qd_mode}/N_{N}"
 
                 if not os.path.exists(file_name):
                     print(f"File {file_name} doesn't exists")
@@ -370,6 +418,7 @@ class Regev(ABC):
                         if type_of_test == 1:
                             for i in range(duplicate):
                                 vectors.append(ast.literal_eval(v))
+                                # print(f"ast.literal_eval(v): {ast.literal_eval(v)}")
                         if type_of_test == 2:
                             vectors.append(ast.literal_eval(v))
                         if type_of_test == 3:
@@ -381,8 +430,8 @@ class Regev(ABC):
                                 v.append(randint(0, 2**dq))
                             vectors.append(v)
                     if type_of_test == 2 and len(vectors) < d+4:
-                        print(f"\nToo little variety of vectors for number {N}\n")
                         result += f"\nToo little variety of vectors for number {N}\n"
+                        print(f"\nToo little variety of vectors for number {N}\n")
                         continue
 
 
@@ -417,10 +466,9 @@ class Regev(ABC):
                     t = 1 + math.ceil(math.log(math.sqrt(d) * R, 2))
                     delta = math.sqrt(d / 2) / R
                     delta_inv = math.ceil(R / math.sqrt(d / 2))
-                    print(f"Parameters:\nN: {N}\ntype_of_test: {type_of_test}\nR: {R}\nT: {T}\nt: {t}\ndelta: {delta}\ndelta_inv: {delta_inv}")
+                    print(f"Parameters:\nN: {N}\nR: {R}\nT: {T}\nt: {t}\ndelta: {delta}\ndelta_inv: {delta_inv}")
 
                     result += (f"N: {N}\n"
-                               f"type_of_test: {type_of_test}\n"
                                f"n: {n}\n"
                                f"number_of_primes (d): {d}\n"
                                f"exp_register_width (qd): {dq}\n"
@@ -509,7 +557,7 @@ class Regev(ABC):
                            f"exec_time: {converted_time}")
 
 
-                file = open(f"output_data/regev/classical_part/file_analysis/{dir1_part}_{dir2_part}/N_{N}", "w")
+                file = open(f"output_data/regev/classical_part/file_analysis_2/{dir1_part}_{dir2_part}/N_{N}", "w")
                 file.write(result)
                 file.close()
 
@@ -672,6 +720,10 @@ class Regev(ABC):
 
 
     def get_vectors(self, N: int, d_ceil=False, qd_ceil=False, semi_classical=False) -> 'RegevResult':
+
+        print("Running quantum part")
+
+        start = time.time()
         self._validate_input(N)
 
         circuit = self.construct_circuit(N, d_ceil, qd_ceil, semi_classical, measurement=True)
@@ -693,7 +745,7 @@ class Regev(ABC):
 
         self.result.total_counts = len(counts)
         self.result.total_shots = self.shots
-        print(f"counts.items(): {counts.items()}")
+        # print(f"counts.items(): {counts.items()}")
 
         sorted_counts_items = sorted(counts.items(), key=lambda x: x[1])
 
@@ -710,6 +762,9 @@ class Regev(ABC):
             self.result.successful_counts += 1
             self.result.successful_shots += shots
 
+        end = time.time()
+        exec_time = (end - start) * (10 ** 3)
+        self.result.quantum_exec_time = exec_time
         result = self.result
         self.result = RegevResult()
 
@@ -746,12 +801,7 @@ class Regev(ABC):
         self.result.exp_register_width = qd
 
 
-        if semi_classical:
-            if not measurement:
-                raise ValueError('Semi-classical implementation have to contain measurement parts.')
-            return self._construct_circuit_with_semiclassical_QFT(N, n, d, qd)
-        else:
-            return self._construct_circuit(N, n, measurement, d, qd)
+        return self._construct_circuit(N, n, measurement, d, qd)
 
 
     @staticmethod
@@ -862,7 +912,8 @@ class Regev(ABC):
         return circuit
 
 
-    def get_factors(self, vect, primes, N):
+    @staticmethod
+    def get_factors(vect, primes, N):
 
         print(f"squared_primes = {primes}\n"
               f"vect: {vect}\n")
@@ -984,6 +1035,17 @@ class RegevResult:
         self._squared_primes = []
         self._output_data = []
         self._vectors = []
+        self._quantum_exec_time = 0
+
+        self._R = 0
+        self._T = 0
+        self._t = 0
+        self._delta = 0
+        self._delta_inv = 0
+        self._vector = 0
+        self._p = 0
+        self._q = 0
+        self._classical_exec_time = 0
 
 
     @property
@@ -1100,6 +1162,86 @@ class RegevResult:
     def vectors(self, value: []) -> None:
         self._vectors = value
 
+    @property
+    def quantum_exec_time(self) -> int:
+        return self._quantum_exec_time
 
+    @quantum_exec_time.setter
+    def quantum_exec_time(self, value: int) -> None:
+        self._quantum_exec_time = value
+
+
+
+    @property
+    def R(self) -> int:
+        return self._R
+
+    @R.setter
+    def R(self, value: int) -> None:
+        self._R = value
+
+    @property
+    def T(self) -> int:
+        return self._T
+
+    @T.setter
+    def T(self, value: int) -> None:
+        self._T = value
+
+    @property
+    def t(self) -> int:
+        return self._t
+
+    @t.setter
+    def t(self, value: int) -> None:
+        self._t = value
+
+    @property
+    def delta(self) -> int:
+        return self._delta
+
+    @delta.setter
+    def delta(self, value: int) -> None:
+        self._delta = value
+
+    @property
+    def delta_inv(self) -> int:
+        return self._delta_inv
+
+    @delta_inv.setter
+    def delta_inv(self, value: int) -> None:
+        self._delta_inv = value
+
+    @property
+    def vector(self) -> []:
+        return self._vector
+
+    @vector.setter
+    def vector(self, value: []) -> None:
+        self._vector = value
+
+    @property
+    def p(self) -> int:
+        return self._p
+
+    @p.setter
+    def p(self, value: int) -> None:
+        self._p = value
+
+    @property
+    def q(self) -> int:
+        return self._q
+
+    @q.setter
+    def q(self, value: int) -> None:
+        self._q = value
+
+    @property
+    def classical_exec_time(self) -> int:
+        return self._classical_exec_time
+
+    @classical_exec_time.setter
+    def classical_exec_time(self, value: int) -> None:
+        self._classical_exec_time = value
 
 
