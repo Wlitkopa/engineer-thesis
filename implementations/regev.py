@@ -748,7 +748,8 @@ class Regev(ABC):
 
         circuit = self.construct_circuit(N, d_ceil, qd_ceil, semi_classical, measurement=True)
         circuit.draw(output='mpl', filename=f'circuit_{N}_{d_ceil}_{qd_ceil}.png')
-        aersim = AerSimulator(method="extended_stabilizer")
+        # aersim = AerSimulator(method="extended_stabilizer")
+        aersim = AerSimulator()
         # Wyświetlenie liczby obsługiwanych kubitów
         print("Max number of qubits (local qasm_simulator):", aersim.configuration().n_qubits)
         # pm = generate_preset_pass_manager(backend=aersim, optimization_level=3  )

@@ -15,15 +15,15 @@ regev = Regev(shots_num)
 Ns = [143]
 d_qd_list = [[False, False]]
 decompose = False
-regev.draw_quantum_circuit(Ns, d_qd_list, decompose)
+# regev.draw_quantum_circuit(Ns, d_qd_list, decompose)
 
 # Run all algorithm
-Ns = [21]
-d_qd_list = [[False, True]]
+Ns = [33, 35, 39, 51, 55, 57]
+d_qd_list = [[True, True], [True, False], [False, True], [False, False]]
 number_of_combinations = 1000
 type_of_test = 1
 find_pq = True
-# regev.run_all_algorithm(Ns, d_qd_list, number_of_combinations, type_of_test, find_pq)
+regev.run_all_algorithm(Ns, d_qd_list, number_of_combinations, type_of_test, find_pq)
 
 
 # Run quantum part
