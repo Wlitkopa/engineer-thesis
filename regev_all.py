@@ -19,7 +19,7 @@ decompose = False
 
 # Run all algorithm
 Ns = [33, 35, 39, 51, 55, 57]
-d_qd_list = [[True, True], [True, False], [False, True], [False, False]]
+d_qd_list = [[True, False], [False, True], [False, False]]
 number_of_combinations = 1000
 type_of_test = 1
 find_pq = True

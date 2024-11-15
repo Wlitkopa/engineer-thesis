@@ -6,12 +6,12 @@ qd_ceil: False
 number_of_primes (d): 2
 exp_register_width (qd): 4
 squared_primes: [4, 49]
-output_data: [[[0, 0], '0000 0000', 57], [[8, 8], '1000 1000', 71]]
+output_data: [[[0, 0], '0000 0000', 63], [[8, 8], '1000 1000', 65]]
 
-vectors: <implementations.regev.RegevResult object at 0x7f7877fd3dd0>
+vectors: <implementations.regev.RegevResult object at 0x7f38f3f52290>
 
-quantum part exec_time (ms): 10505.979061126709ms
-quantum part exec_time: 10s 505.979061126709ms
+quantum part exec_time (ms): 10900.737285614014ms
+quantum part exec_time: 10s 900.7372856140137ms
 
 =============== CLASSICAL PART ===============
 R: 2903
@@ -22,11 +22,11 @@ delta_inv: 2903
 type_of_test: 1
 number_of_combinations: 1000
 
-classical part exec_time (ms): 73444.67902183533ms
-classical part exec_time: 1m 13s 444.67902183532715ms
+classical part exec_time (ms): 70436.55967712402ms
+classical part exec_time: 1m 10s 436.55967712402344ms
 
 =============== ALL TOGETHER ===============
 p: 3
 q: 5
-total exec_time (ms): 83950.83808898926ms
-total exec_time: 1m 23s 950.8380889892578ms
+total exec_time (ms): 81337.50200271606ms
+total exec_time: 1m 21s 337.50200271606445ms

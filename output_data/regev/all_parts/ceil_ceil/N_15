@@ -1,0 +1,32 @@
+=============== QUANTUM PART ===============
+N: 15
+n: 4
+d_ceil: True
+qd_ceil: True
+number_of_primes (d): 2
+exp_register_width (qd): 4
+squared_primes: [4, 49]
+output_data: [[[0, 0], '0000 0000', 57], [[8, 8], '1000 1000', 71]]
+
+vectors: <implementations.regev.RegevResult object at 0x7f399c1ce010>
+
+quantum part exec_time (ms): 9657.721042633057ms
+quantum part exec_time: 9s 657.7210426330566ms
+
+=============== CLASSICAL PART ===============
+R: 2903
+T: 3
+t: 14
+delta: 0.0003444712366517396
+delta_inv: 2903
+type_of_test: 1
+number_of_combinations: 1000
+
+classical part exec_time (ms): 71025.23446083069ms
+classical part exec_time: 1m 11s 25.234460830688477ms
+
+=============== ALL TOGETHER ===============
+p: 3
+q: 5
+total exec_time (ms): 80683.13455581665ms
+total exec_time: 1m 20s 683.1345558166504ms
