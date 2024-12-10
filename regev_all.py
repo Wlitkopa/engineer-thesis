@@ -23,13 +23,13 @@ d_qd_list = [[True, False], [False, True], [False, False]]
 number_of_combinations = 1000
 type_of_test = 1
 find_pq = True
-regev.run_all_algorithm(Ns, d_qd_list, number_of_combinations, type_of_test, find_pq)
+# regev.run_all_algorithm(Ns, d_qd_list, number_of_combinations, type_of_test, find_pq)
 
 
 # Run quantum part
-Ns = [15]
-d_qd_list = [[True, True]]
-# regev.run_quantum_part_data_collection(Ns, d_qd_list)
+Ns = [143]
+d_qd_list = [[False, False]]
+regev.run_quantum_part_data_collection(Ns, d_qd_list)
 
 
 # Analysing data from a quantum part output file

@@ -349,7 +349,7 @@ class Regev(ABC):
                 else:
                     qd_mode = "floor"
 
-                file = open(f"output_data/regev/quantum_part_2/{d_mode}_{qd_mode}/N_{N}", "w")
+                file = open(f"output_data/regev/quantum_part/{d_mode}_{qd_mode}/N_{N}", "w")
                 file.write(result_str)
                 file.close()
 
@@ -532,7 +532,7 @@ class Regev(ABC):
 
                         for i in range(d):
                             square = 1
-                            f = 0
+                            f55 = 0
                             temp_vector = []
                             for j in range(d):
                                 square *= pow(a_root[j], (M_LLL_t[i][j]), N)
@@ -747,11 +747,19 @@ class Regev(ABC):
         self._validate_input(N)
 
         circuit = self.construct_circuit(N, d_ceil, qd_ceil, semi_classical, measurement=True)
-        circuit.draw(output='mpl', filename=f'circuit_{N}_{d_ceil}_{qd_ceil}.png')
         # aersim = AerSimulator(method="extended_stabilizer")
         aersim = AerSimulator()
         # Wyświetlenie liczby obsługiwanych kubitów
         print("Max number of qubits (local qasm_simulator):", aersim.configuration().n_qubits)
+        # print("Max circuits: ", aersim.max_circuits)
+        # print("available_methods(): ", aersim.available_methods())
+        # print("available_devices(): ", aersim.available_devices())
+        #
+        # print("configuration(): ", aersim.configuration())
+        # print("name: ", aersim.name)
+        # print("")
+
+
         # pm = generate_preset_pass_manager(backend=aersim, optimization_level=3  )
         pm = transpile(circuit, aersim)
 
@@ -914,8 +922,6 @@ class Regev(ABC):
 
         qft = QFT(qd).to_gate()
 
-
-        # UWAGA! TEN FRAGMENT KODU ZAKOMENTOWANY NA POTRZEBY TESTU, NORMALNIE MUSI BYĆ ODKOMENTOWANY
 
         for i in range(d):
             circuit.append(
