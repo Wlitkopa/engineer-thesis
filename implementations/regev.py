@@ -23,7 +23,7 @@ from random import shuffle, randint
 from fractions import Fraction
 from decimal import Decimal, getcontext
 import time
-from utils.secrets import ibm_api_token
+# from utils.secrets import ibm_api_token
 
 
 # Importy z data_analizer.py
@@ -258,7 +258,7 @@ class Regev(ABC):
             # check if given combinations of vectors returns correct solution
 
             break_flag = 0
-            for i in range(d):
+            for i in range(1, 2*d + 4):
                 square = 1
                 f = 0
                 temp_vector = []
@@ -394,7 +394,7 @@ class Regev(ABC):
 
                 N = Ns[l]
                 print(f"\nN: {N}")
-                file_name = f"/home/koan/myHome/AGH/PracaInżynierska/pycharm_github/shor_mmik/output_data/regev/quantum_part/{d_mode}_{qd_mode}/N_{N}"
+                file_name = f"./output_data/regev/quantum_part/{d_mode}_{qd_mode}/N_{N}"
 
                 if not os.path.exists(file_name):
                     print(f"File {file_name} doesn't exists")
@@ -463,25 +463,29 @@ class Regev(ABC):
                     for i in range(m):
                         powers.append(i)
 
-                    T = N
 
-                    for p in itertools.product(powers, repeat=d):
-                        if p == (0,) * d:
-                            # print("UWAGA:", p)
-                            continue
-                        T_tmp = 1
-                        v_len_tmp = 1
-                        for i in range(d):
-                            T_tmp *= pow(a_root[i], p[i], N)
-                            v_len_tmp += pow(p[i], 2)
-                        v_len_tmp = math.ceil(math.sqrt(v_len_tmp))
-                        # print(p, T_tmp, v_len_tmp)
-                        if T_tmp % N == 1 and v_len_tmp < T:
-                            # print(a_root)
-                            # print(p)
-                            # print(v_len_tmp)
-                            T = v_len_tmp
-                    # print('T', T)
+                    # This fragment of code allows to find exact value of T
+                    # T = N
+                    # for p in itertools.product(powers, repeat=d):
+                    #     if p == (0,) * d:
+                    #         # print("UWAGA:", p)
+                    #         continue
+                    #     T_tmp = 1
+                    #     v_len_tmp = 1
+                    #     for i in range(d):
+                    #         T_tmp *= pow(a_root[i], p[i], N)
+                    #         v_len_tmp += pow(p[i], 2)
+                    #     v_len_tmp = math.ceil(math.sqrt(v_len_tmp))
+                    #     # print(p, T_tmp, v_len_tmp)
+                    #     if T_tmp % N == 1 and v_len_tmp < T:
+                    #         # print(a_root)
+                    #         # print(p)
+                    #         # print(v_len_tmp)
+                    #         T = v_len_tmp
+
+                    # This fragment of code estimate the value of T
+                    T = math.ceil(math.exp(n/(2*d)))
+
                     R = math.ceil(6 * T * math.sqrt((d + 5) * (2 * d) + 4) * (d / 2) * (2 ** ((dq + 1) / (d + 4) + d + 2)))
                     t = 1 + math.ceil(math.log(math.sqrt(d) * R, 2))
                     delta = math.sqrt(d / 2) / R
@@ -522,7 +526,6 @@ class Regev(ABC):
                         # make LLL algorithm on columns of lattice M
                         M_LLL = olll.reduction(M.transpose().tolist(), 0.75)
                         M_LLL_t = np.matrix(M_LLL).transpose().tolist()
-
                         # create flags to count different solutions from lattice once
                         s1 = 0
                         s2 = 0
@@ -530,7 +533,7 @@ class Regev(ABC):
                         # s2_f = 0
                         # check if given combinations of vectors returns correct solution
 
-                        for i in range(d):
+                        for i in range(0, 2*d + 4):
                             square = 1
                             f = 0
                             temp_vector = []
@@ -540,7 +543,7 @@ class Regev(ABC):
                                 temp_vector.append(M_LLL_t[i][j])
                                 # if M_LLL_t[i][j] < 0:
                                 #     f = 1
-                            if (square * square) % N == 1 and f == 0:
+                            if (square * square) % N == 1 and f == 0 and temp_vector != d*[0]:
                                 s1 = 1
                                 if square != N - 1 and square != 1:
                                     s2 = 1
@@ -595,148 +598,6 @@ class Regev(ABC):
 
                     vector = p_q_vectors[0]
                     self.get_factors(vector, a_root, N)
-
-
-    def run_file_data_analyzer_old(self, file_name):
-
-        if not os.path.exists(file_name):
-            print(f"File {file_name} doesn't exists")
-            return -1
-
-        start = time.time()
-
-        result = ""
-        vectors = []
-        p_q_vectors = []
-
-        dir1_part = file_name.split("/")[-2].split("_")[0]
-        dir2_part = file_name.split("/")[-2].split("_")[1]
-
-        print(f"dir1_part: {dir1_part}\ndir2_part: {dir2_part}")
-
-        with open(file_name) as results:
-
-            dq = 0
-            for i in range(10):
-                line = results.readline()
-                if i == 0:
-                    N = int(line.split(' ')[1])
-                if i == 4:
-                    d = int(line.split(':')[1][:-1])
-                if i == 5:
-                    dq = int(line.split(':')[1][:-1])
-                if i == 6:
-                    a = ast.literal_eval(line.split(':')[1])
-                    a_root = []
-                    for a_ in a:
-                        a_root.append(int(math.sqrt(a_)))
-
-            while (line := results.readline()) != '\n':
-                v = line.split(':')[1][:-2]
-                duplicate = int(line.split(' ')[2])
-                # for i in range(min(d+4, duplicate)):
-                vectors.append(ast.literal_eval(v))
-
-            shuffle(vectors)
-            print(vectors)
-            print(dq)
-
-        qd = dq
-
-        n = N.bit_length()
-        result += (f"N: {N}\n"
-                   f"n: {n}\n"
-                   f"number_of_primes (d): {d}\n"
-                   f"exp_register_width (qd): {qd}\n"
-                   f"squared primes (a): {a_root}\n\n")
-
-
-        # self.get_vectors(N, d_ceil, qd_ceil, semi_classical)
-        np.set_printoptions(suppress=True)
-        # if len(self.vectors) == 0:
-        #     return -1
-        #
-        # d = self.result.number_of_primes
-        # qd = self.result.exp_register_width
-        # a = self.result.squared_primes
-        # vectors = self.vectors
-
-        T = 2
-        R = math.ceil(6 * T * math.sqrt((d + 5) * (2 * d) + 4) * (d / 2) * (2 ** ((qd + 1) / (d + 4) + d + 2)))
-        t = 1 + math.ceil(math.log(math.sqrt(d) * R, 2))
-        delta = math.sqrt(d / 2) / R
-        delta_inv = R / math.sqrt(d / 2)
-
-        result += (f"T: {T}\n"
-                   f"R: {R}\n"
-                   f"t: {t}\n"
-                   f"delta: {delta}\n"
-                   f"delta_inv: {delta_inv}\n\n")
-
-        I_d = np.identity(d)
-        zeros_d_d4 = np.zeros((d, d + 4))
-        I_d4_d4_delta = delta_inv * np.identity(d + 4)
-
-        number_of_combinations = 0
-        success1 = 0
-        success2 = 0
-        successful_vectors = set()
-
-        for w_d4_d in itertools.combinations(vectors, d + 4):
-
-            number_of_combinations += 1
-            M = np.block([
-                [I_d, zeros_d_d4],
-                [np.matrix(list(w_d4_d)), I_d4_d4_delta],
-            ])
-            M_LLL = olll.reduction(M.transpose().tolist(), 0.75)
-            M_LLL_inv = np.matrix(M_LLL).transpose().tolist()
-
-            for i in range(d):
-                square = 1
-                for j in range(d):
-                    square *= pow(a_root[j], (M_LLL_inv[i][j]), N)
-                    square %= N
-                if (square * square) % N == 1:
-                    break
-
-            if (square * square) % N == 1:
-                success1 += 1
-                if square != N - 1 and square != 1:
-                    print(f"Vector that gives p and q: {str(v)}")
-                    p_q_vectors.append(str(v))
-                    success2 += 1
-                for v in w_d4_d:
-                    successful_vectors.add(str(v))
-
-        unsuccessful_vectors = vectors
-        for v in successful_vectors:
-            unsuccessful_vectors.remove(ast.literal_eval(v))
-
-        end = time.time()
-        exec_time = (end - start) * (10 ** 3)
-        converted_time = convert_milliseconds(exec_time)
-
-        result += (f"Number of combinations that result % N = 1: {success1 * 100 / number_of_combinations}%\n"
-                   f"Number of combinations that give p and q: {success2 * 100 / number_of_combinations}%\n"
-                   f"Unsuccessful vectors {unsuccessful_vectors}\n"
-                   f"Successful vectors {successful_vectors}\n"
-                   f"Vectors that gives p and q: {p_q_vectors}\n"
-                   f"\nexec_time (ms): {exec_time} ms\n"
-                   f"exec_time: {converted_time}")
-
-        file = open(f"output_data/regev/classical_part/file_analysis/{dir1_part}_{dir2_part}/N_{N}", "w")
-        file.write(result)
-        file.close()
-
-        print(f'Number of combinations that result % N = 1: {success1 * 100 / number_of_combinations}%')
-        print(f'Number of combinations that give p and q: {success2 * 100 / number_of_combinations}%')
-        print(f'Successful vectors {successful_vectors}')
-        print(f'Vectors that give p and q: {p_q_vectors}')
-        print(f'Unsuccessful vectors {unsuccessful_vectors}')
-
-        print(f"exec_time: {exec_time}ms")
-        print(f"converted_time: {converted_time}")
 
 
     def get_vectors(self, N: int, d_ceil=False, qd_ceil=False, semi_classical=False) -> 'RegevResult':
