@@ -108,7 +108,7 @@ class Regev(ABC):
                 quantum_result = self.get_vectors(N, d_ceil=d_ceil_bool, qd_ceil=qd_ceil_bool, semi_classical=False)
                 classic_result = self.run_classical_part(number_of_combinations, N, quantum_result.n, quantum_result.number_of_primes, quantum_result.exp_register_width, quantum_result.squared_primes, quantum_result.output_data, type_of_test, find_pq)
                 end = time.time()
-                exec_time = (end - start) * (10 ** 3)
+                exec_time = (end - start) * 1000
                 converted_time = convert_milliseconds(exec_time)
 
                 result_str += (f"=============== QUANTUM PART ===============\n"
@@ -349,7 +349,7 @@ class Regev(ABC):
                 else:
                     qd_mode = "floor"
 
-                file = open(f"output_data/regev/quantum_part/{d_mode}_{qd_mode}/N_{N}", "w")
+                file = open(f"output_data/regev/quantum_part_2/{d_mode}_{qd_mode}/N_{N}", "w")
                 file.write(result_str)
                 file.close()
 
@@ -532,7 +532,7 @@ class Regev(ABC):
 
                         for i in range(d):
                             square = 1
-                            f55 = 0
+                            f = 0
                             temp_vector = []
                             for j in range(d):
                                 square *= pow(a_root[j], (M_LLL_t[i][j]), N)

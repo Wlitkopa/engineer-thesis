@@ -28,7 +28,7 @@ find_pq = True
 
 # Run quantum part
 Ns = [143]
-d_qd_list = [[False, False]]
+d_qd_list = [[False, True]]
 regev.run_quantum_part_data_collection(Ns, d_qd_list)
 
 

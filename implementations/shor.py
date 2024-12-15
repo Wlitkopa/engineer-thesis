@@ -1,3 +1,4 @@
+import time
 from typing import Union, Tuple, Optional
 
 import numpy as np
@@ -29,6 +30,18 @@ class Shor(ABC):
     def __init__(self,  shots) -> None:
         self.shots= shots
 
+    def factor2(self, a: int, N: int, semi_classical: bool):
+        shor_result = self.get_order(a, N, semi_classical)
+        if shor_result.order:
+            order = shor_result.order
+            factors = self._get_factors(order, a, N)
+            if factors:
+                logger.info('Found factors %s from order %s.', factors, order)
+                print(f"\nFactors: {factors}\n"
+                      f"Order {order}\n")
+                return shor_result
+
+        return shor_result
 
     def factor(self, a: int, N: int, semi_classical: bool) -> Optional[Tuple[int, int]]:
         shor_result = self.get_order(a, N, semi_classical)
@@ -63,11 +76,16 @@ class Shor(ABC):
         result.total_counts = len(counts)
         result.total_shots =  self.shots
 
+
         all_orders = []
 
         for measurement, shots in counts.items():
             measurement = self._parse_measurement(measurement, semi_classical)
+            start = time.time()
             order = self._get_order(measurement, a, N)
+            end = time.time()
+            result.classical_milliseconds += (end - start) * 1000
+
 
             result.output_data.append([measurement, shots])
             if order:
@@ -85,7 +103,9 @@ class Shor(ABC):
                 result.successful_counts += 1
                 result.successful_shots += shots
 
+        result.classical_milliseconds = result.classical_milliseconds / result.total_counts
         result.all_orders = all_orders
+        print(f"Factors: {self._get_factors(result.order, a, N)}")
         return result
 
     def construct_circuit(self, a: int, N: int, semi_classical: bool = False, measurement: bool = True):
@@ -263,6 +283,7 @@ class ShorResult():
         self._random_prime = 0
         self._all_orders = []
         self._output_data = []
+        self._classical_milliseconds = 0
 
 
 
@@ -346,5 +367,13 @@ class ShorResult():
     @output_data.setter
     def output_data(self, value: []) -> None:
         self._output_data = value
+
+    @property
+    def classical_milliseconds(self) -> int:
+        return self._classical_milliseconds
+
+    @classical_milliseconds.setter
+    def classical_milliseconds(self, value: int) -> None:
+        self._classical_milliseconds = value
 
 

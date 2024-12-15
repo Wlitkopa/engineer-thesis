@@ -2,15 +2,18 @@ N: 15
 n: 4
 random a: 11
 total_shots: 128
-successful_shots: 60
+successful_shots: 57
 total results count: 2
 successful results count: 1
-output_data: [[128, 60], [0, 68]]
+output_data: [[0, 71], [128, 57]]
 
 all orders: 
-order with 60 shots: 2
+order with 57 shots: 2
 
 order: 2
 
-exec_time (ms): 23064.06021118164 ms
-exec_time: 23s 64.06021118164062ms
+average classical part exec time (ms): 0.03266334533691406
+average classical part exec time: 0.03266334533691406ms
+
+exec_time (ms): 17820.822954177856 ms
+exec_time: 17s 820.8229541778564ms

@@ -5,8 +5,8 @@ from utils.get_coprime import *
 import time
 import os
 
-# Ns = [65, 69, 77, 85, 91, 95, 119, 143]
-Ns = [15, 21, 33, 35, 39, 51, 55, 57, 65, 69, 77, 85, 91, 95, 119, 143]
+# Ns = [15, 21, 33, 35, 39, 51, 55, 57, 65, 69, 77]
+Ns = [55]
 
 
 for i in range(len(Ns)):
@@ -34,18 +34,29 @@ for i in range(len(Ns)):
                 a = pc
                 break
 
-    print(f"a: {a}")
+    print(f"a1: {a}")
+
+    a = 13
+
+    print(f"a2: {a}")
 
     shor = Shor(shots=128)
     circuit = shor.construct_circuit(a, N, semi_classical=False, measurement=True)
     # circuit.draw(output='mpl', fold=-1)
+    # result = shor.get_order(a, N, semi_classical=False)
+
+    # Alternative version
     result = shor.get_order(a, N, semi_classical=False)
+
 
     end = time.time()
     exec_time = (end-start)*(10**3)
 
     converted_time = convert_milliseconds(exec_time)
     orders = convert_to_order_list(result.all_orders)
+
+    classical_exec_time = result.classical_milliseconds
+    classical_converted_time = convert_milliseconds(classical_exec_time)
 
     result_str = (f"N: {result.N}\n"
                   f"n: {result.n}\n"
@@ -57,6 +68,8 @@ for i in range(len(Ns)):
                   f"output_data: {result.output_data}\n"
                   f"\nall orders: {orders}\n"
                   f"\norder: {result.order}\n"
+                  f"\naverage classical part exec time (ms): {classical_exec_time}\n"
+                  f"average classical part exec time: {classical_converted_time}\n"
                   f"\nexec_time (ms): {exec_time} ms\n"
                   f"exec_time: {converted_time}")
     try:
