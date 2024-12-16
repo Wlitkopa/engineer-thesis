@@ -5,6 +5,7 @@ from implementations.r_haner import HanerRegev as Regev
 # All analysed values
 # Ns = [15, 21, 33, 35, 39, 51, 55, 57, 65, 69, 77, 85, 91, 95, 119, 143]
 # d_qd_list = [[True, True], [True, False], [False, True], [False, False]]
+# type_of_test_array = [1, 2, 3]
 
 
 # Initiating Regev algorithm class
@@ -33,11 +34,11 @@ d_qd_list = [[False, True]]
 
 
 # Analysing data from a quantum part output file
-Ns = [15, 21, 33, 35, 39, 51, 55, 57]
-d_qd_list = [[True, False]]
+Ns = [15, 21, 33, 35, 39, 51, 55, 57, 65, 69, 77, 85, 91, 95, 119, 143]
+d_qd_list = [[True, True], [True, False], [False, True], [False, False]]
 number_of_combinations = 1000
-type_of_test = 1
-regev.run_file_data_analyzer_new(Ns, d_qd_list, number_of_combinations, type_of_test)
+type_of_test_array = [1, 2, 3]
+regev.run_file_data_analyzer(Ns, d_qd_list, number_of_combinations, type_of_test_array)
 
 
 # Run on IBM quantum computer

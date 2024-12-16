@@ -366,7 +366,7 @@ class Regev(ABC):
                 print(f"converted_time: {converted_time}")
 
 
-    def run_file_data_analyzer_new(self, Ns, d_qd_list, number_of_combinations, type_of_test=1):
+    def run_file_data_analyzer(self, Ns, d_qd_list, number_of_combinations, type_of_test_array=[1]):
 
         # Type of test
         # 1 - deafult, check number_of_combinations random combinations of vectors return by quantum computer if returns
@@ -375,229 +375,239 @@ class Regev(ABC):
         # correct powers, but do not count fact that some vectors are replicated
         # 3 - check number_of_combinations random combinations of totaly random vectors if returns
         # correct powers
+        for t in range(len(type_of_test_array)):
+            type_of_test = type_of_test_array[t]
 
-        for k in range(len(d_qd_list)):
-            d_ceil_bool = d_qd_list[k][0]
-            qd_ceil_bool = d_qd_list[k][1]
+            print(f"\n\nTYPE OF TEST: {type_of_test}\n\n")
 
-            if d_ceil_bool:
-                d_mode = "ceil"
-            else:
-                d_mode = "floor"
+            for k in range(len(d_qd_list)):
+                d_ceil_bool = d_qd_list[k][0]
+                qd_ceil_bool = d_qd_list[k][1]
 
-            if qd_ceil_bool:
-                qd_mode = "ceil"
-            else:
-                qd_mode = "floor"
+                if d_ceil_bool:
+                    d_mode = "ceil"
+                else:
+                    d_mode = "floor"
 
-            for l in range(len(Ns)):
+                if qd_ceil_bool:
+                    qd_mode = "ceil"
+                else:
+                    qd_mode = "floor"
 
-                N = Ns[l]
-                print(f"\nN: {N}")
-                file_name = f"./output_data/regev/quantum_part/{d_mode}_{qd_mode}/N_{N}"
+                for l in range(len(Ns)):
 
-                if not os.path.exists(file_name):
-                    print(f"File {file_name} doesn't exists")
-                    return -1
+                    N = Ns[l]
+                    print(f"\nN: {N}")
+                    file_name = f"./output_data/regev/quantum_part/{d_mode}_{qd_mode}/N_{N}"
 
-
-                result = ""
-                vectors = []
-                p_q_vectors = []
-
-                dir1_part = file_name.split("/")[-2].split("_")[0]
-                dir2_part = file_name.split("/")[-2].split("_")[1]
-
-                print(f"dir1_part: {dir1_part}\ndir2_part: {dir2_part}")
-
-                with open(file_name) as results:
-
-                    # read parameters from input file
-                    dq = 0
-                    for i in range(10):
-                        line = results.readline()
-                        if i == 0:
-                            N = int(line.split(' ')[1])
-                        if i == 1:
-                            n = int(line.split(' ')[1])
-                        if i == 4:
-                            d = int(line.split(':')[1][:-1])
-                        if i == 5:
-                            dq = int(line.split(':')[1][:-1])
-                        if i == 6:
-                            a = ast.literal_eval(line.split(':')[1])
-                            a_root = []
-                            for a_ in a:
-                                a_root.append(int(math.sqrt(a_)))
-
-                    # read vectors from file or generate vectors
-                    total_number_of_vectors = 0
-                    while (line := results.readline()) != '\n':
-                        v = line.split(':')[1][:-2]
-                        duplicate = int(line.split(' ')[2])
-                        if type_of_test == 1:
-                            for i in range(duplicate):
-                                vectors.append(ast.literal_eval(v))
-                                # print(f"ast.literal_eval(v): {ast.literal_eval(v)}")
-                        if type_of_test == 2:
-                            vectors.append(ast.literal_eval(v))
-                        if type_of_test == 3:
-                            total_number_of_vectors += duplicate
-                    if type_of_test == 3:
-                        for i in range(total_number_of_vectors):
-                            v = []
-                            for j in range(d):
-                                v.append(randint(0, 2**dq))
-                            vectors.append(v)
-                    if type_of_test == 2 and len(vectors) < d+4:
-                        result += f"\nToo little variety of vectors for number {N}\n"
-                        print(f"\nToo little variety of vectors for number {N}\n")
+                    if not os.path.exists(file_name):
+                        print(f"File {file_name} doesn't exists")
                         continue
 
 
-                    start = time.time()
+                    result = ""
+                    vectors = []
+                    p_q_vectors = []
 
-                    # calculate parameters necessary to create lattice
-                    m = math.ceil(n / d) + 2
-                    powers = []
-                    for i in range(m):
-                        powers.append(i)
+                    dir1_part = file_name.split("/")[-2].split("_")[0]
+                    dir2_part = file_name.split("/")[-2].split("_")[1]
 
+                    print(f"dir1_part: {dir1_part}\ndir2_part: {dir2_part}")
 
-                    # This fragment of code allows to find exact value of T
-                    # T = N
-                    # for p in itertools.product(powers, repeat=d):
-                    #     if p == (0,) * d:
-                    #         # print("UWAGA:", p)
-                    #         continue
-                    #     T_tmp = 1
-                    #     v_len_tmp = 1
-                    #     for i in range(d):
-                    #         T_tmp *= pow(a_root[i], p[i], N)
-                    #         v_len_tmp += pow(p[i], 2)
-                    #     v_len_tmp = math.ceil(math.sqrt(v_len_tmp))
-                    #     # print(p, T_tmp, v_len_tmp)
-                    #     if T_tmp % N == 1 and v_len_tmp < T:
-                    #         # print(a_root)
-                    #         # print(p)
-                    #         # print(v_len_tmp)
-                    #         T = v_len_tmp
+                    with open(file_name) as results:
 
-                    # This fragment of code estimate the value of T
-                    T = math.ceil(math.exp(n/(2*d)))
+                        # read parameters from input file
+                        dq = 0
+                        for i in range(10):
+                            line = results.readline()
+                            if i == 0:
+                                N = int(line.split(' ')[1])
+                            if i == 1:
+                                n = int(line.split(' ')[1])
+                            if i == 4:
+                                d = int(line.split(':')[1][:-1])
+                            if i == 5:
+                                dq = int(line.split(':')[1][:-1])
+                            if i == 6:
+                                a = ast.literal_eval(line.split(':')[1])
+                                a_root = []
+                                for a_ in a:
+                                    a_root.append(int(math.sqrt(a_)))
 
-                    R = math.ceil(6 * T * math.sqrt((d + 5) * (2 * d) + 4) * (d / 2) * (2 ** ((dq + 1) / (d + 4) + d + 2)))
-                    t = 1 + math.ceil(math.log(math.sqrt(d) * R, 2))
-                    delta = math.sqrt(d / 2) / R
-                    delta_inv = math.ceil(R / math.sqrt(d / 2))
-                    print(f"Parameters:\nN: {N}\nR: {R}\nT: {T}\nt: {t}\ndelta: {delta}\ndelta_inv: {delta_inv}")
+                        # read vectors from file or generate vectors
+                        total_number_of_vectors = 0
+                        while (line := results.readline()) != '\n':
+                            v = line.split(':')[1][:-2]
+                            duplicate = int(line.split(' ')[2])
+                            if type_of_test == 1:
+                                for i in range(duplicate):
+                                    vectors.append(ast.literal_eval(v))
+                                    # print(f"ast.literal_eval(v): {ast.literal_eval(v)}")
+                            if type_of_test == 2:
+                                vectors.append(ast.literal_eval(v))
+                            if type_of_test == 3:
+                                total_number_of_vectors += duplicate
+                        if type_of_test == 3:
+                            for i in range(total_number_of_vectors):
+                                v = []
+                                for j in range(d):
+                                    v.append(randint(0, 2**dq))
+                                vectors.append(v)
+                        if type_of_test == 2 and len(vectors) < d+4:
+                            result += f"\nToo little variety of vectors for number {N}\n"
+                            print(f"\nToo little variety of vectors for number {N}\n")
+                            # continue
 
-                    result += (f"N: {N}\n"
-                               f"n: {n}\n"
-                               f"number_of_primes (d): {d}\n"
-                               f"exp_register_width (qd): {dq}\n"
-                               f"primes: {a_root}\n\n"
-                               f"R: {R}\n"
-                               f"T: {T}\n"
-                               f"t: {t}\n"
-                               f"delta: {delta}\n"
-                               f"delta_inv: {delta_inv}")
+                        else:
+                            start = time.time()
 
-                    # create block of lattice
-                    I_d = np.identity(d)
-                    zeros_d_d4 = np.zeros((d, d + 4))
-                    I_d4_d4_delta = delta_inv * np.identity(d + 4)
-
-                    success1 = 0
-                    success2 = 0
-                    # success1_f = 0
-                    # success2_f = 0
-
-                    for _ in range(number_of_combinations):
-                        # get random combinations from vectors
-                        shuffle(vectors)
-                        w_d4_d = vectors[:d + 4]
-                        # create lattice M with usage created blocks according to Regev algorithm
-                        M = np.block([
-                            [I_d, zeros_d_d4],
-                            [np.matrix(w_d4_d) * (delta_inv / (2 ** t)), I_d4_d4_delta],
-                        ])
-
-                        # make LLL algorithm on columns of lattice M
-                        M_LLL = olll.reduction(M.transpose().tolist(), 0.75)
-                        M_LLL_t = np.matrix(M_LLL).transpose().tolist()
-                        # create flags to count different solutions from lattice once
-                        s1 = 0
-                        s2 = 0
-                        # s1_f = 0
-                        # s2_f = 0
-                        # check if given combinations of vectors returns correct solution
-
-                        for i in range(0, 2*d + 4):
-                            square = 1
-                            f = 0
-                            temp_vector = []
-                            for j in range(d):
-                                square *= pow(a_root[j], (M_LLL_t[i][j]), N)
-                                square %= N
-                                temp_vector.append(M_LLL_t[i][j])
-                                # if M_LLL_t[i][j] < 0:
-                                #     f = 1
-                            if (square * square) % N == 1 and f == 0 and temp_vector != d*[0]:
-                                s1 = 1
-                                if square != N - 1 and square != 1:
-                                    s2 = 1
-                                    p_q_vectors.append(temp_vector)
-                                    break
-                            # if (square*square) % N == 1 and f == 1:
-                            #     s1_f = 1
-                            #     if square != N-1 and square != 1:
-                            #         s2_f = 1
-
-                        if s1 == 1:
-                            success1 += 1
-                        # elif s1_f == 1:
-                        #     success1_f += 1
-
-                        if s2 == 1:
-                            success2 += 1
-                        # elif s2_f == 1:
-                        #     success2_f += 1
+                            # calculate parameters necessary to create lattice
+                            m = math.ceil(n / d) + 2
+                            powers = []
+                            for i in range(m):
+                                powers.append(i)
 
 
-                end = time.time()
-                exec_time = (end - start) * (10 ** 3)
-                converted_time = convert_milliseconds(exec_time)
+                            # This fragment of code allows to find exact value of T
+                            # T = N
+                            # for p in itertools.product(powers, repeat=d):
+                            #     if p == (0,) * d:
+                            #         # print("UWAGA:", p)
+                            #         continue
+                            #     T_tmp = 1
+                            #     v_len_tmp = 1
+                            #     for i in range(d):
+                            #         T_tmp *= pow(a_root[i], p[i], N)
+                            #         v_len_tmp += pow(p[i], 2)
+                            #     v_len_tmp = math.ceil(math.sqrt(v_len_tmp))
+                            #     # print(p, T_tmp, v_len_tmp)
+                            #     if T_tmp % N == 1 and v_len_tmp < T:
+                            #         # print(a_root)
+                            #         # print(p)
+                            #         # print(v_len_tmp)
+                            #         T = v_len_tmp
 
-                result += (f"Percent of combinations (with positive values of result vector) that gives % N = 1: {success1 * 100 / number_of_combinations}%\n"
-                           f"Percent of combinations (with positive values of result vector) that give p and q: {success2 * 100 / number_of_combinations}%\n"
-                           # f"Percent of combinations (including negative values) that gives % N = 1: {(success1_f + success1) * 100 / number_of_combinations}%\n"
-                           # f"Percent of combinations (including negative values) that give p and q: {(success2_f + success2) * 100 / number_of_combinations}%\n"
-                           # f"Unsuccessful vectors {unsuccessful_vectors}\n"
-                           # f"Successful vectors {successful_vectors}\n"
-                           f"Vectors that gives p and q: {p_q_vectors}\n"
-                           f"\nexec_time (ms): {exec_time} ms\n"
-                           f"exec_time: {converted_time}")
+                            # This fragment of code estimate the value of T
+                            T = math.ceil(math.exp(n/(2*d)))
+
+                            R = math.ceil(6 * T * math.sqrt((d + 5) * (2 * d) + 4) * (d / 2) * (2 ** ((dq + 1) / (d + 4) + d + 2)))
+                            t = 1 + math.ceil(math.log(math.sqrt(d) * R, 2))
+                            delta = math.sqrt(d / 2) / R
+                            delta_inv = math.ceil(R / math.sqrt(d / 2))
+                            print(f"Parameters:\nN: {N}\nR: {R}\nT: {T}\nt: {t}\ndelta: {delta}\ndelta_inv: {delta_inv}")
+
+                            result += (f"N: {N}\n"
+                                       f"n: {n}\n"
+                                       f"number_of_primes (d): {d}\n"
+                                       f"exp_register_width (qd): {dq}\n"
+                                       f"primes: {a_root}\n\n"
+                                       f"R: {R}\n"
+                                       f"T: {T}\n"
+                                       f"t: {t}\n"
+                                       f"delta: {delta}\n"
+                                       f"delta_inv: {delta_inv}")
+
+                            # create block of lattice
+                            I_d = np.identity(d)
+                            zeros_d_d4 = np.zeros((d, d + 4))
+                            I_d4_d4_delta = delta_inv * np.identity(d + 4)
+
+                            success1 = 0
+                            success2 = 0
+                            # success1_f = 0
+                            # success2_f = 0
+
+                            for _ in range(number_of_combinations):
+                                # get random combinations from vectors
+                                shuffle(vectors)
+                                w_d4_d = vectors[:d + 4]
+                                # create lattice M with usage created blocks according to Regev algorithm
+                                M = np.block([
+                                    [I_d, zeros_d_d4],
+                                    [np.matrix(w_d4_d) * (delta_inv / (2 ** t)), I_d4_d4_delta],
+                                ])
+
+                                # make LLL algorithm on columns of lattice M
+                                M_LLL = olll.reduction(M.transpose().tolist(), 0.75)
+                                M_LLL_t = np.matrix(M_LLL).transpose().tolist()
+                                # create flags to count different solutions from lattice once
+                                s1 = 0
+                                s2 = 0
+                                # s1_f = 0
+                                # s2_f = 0
+                                # check if given combinations of vectors returns correct solution
+
+                                for i in range(0, 2*d + 4):
+                                    square = 1
+                                    f = 0
+                                    temp_vector = []
+                                    for j in range(d):
+                                        square *= pow(a_root[j], (M_LLL_t[i][j]), N)
+                                        square %= N
+                                        temp_vector.append(M_LLL_t[i][j])
+                                        # if M_LLL_t[i][j] < 0:
+                                        #     f = 1
+                                    if (square * square) % N == 1 and f == 0 and temp_vector != d*[0]:
+                                        s1 = 1
+                                        if square != N - 1 and square != 1:
+                                            s2 = 1
+                                            p_q_vectors.append(temp_vector)
+                                            break
+                                    # if (square*square) % N == 1 and f == 1:
+                                    #     s1_f = 1
+                                    #     if square != N-1 and square != 1:
+                                    #         s2_f = 1
+
+                                if s1 == 1:
+                                    success1 += 1
+                                # elif s1_f == 1:
+                                #     success1_f += 1
+
+                                if s2 == 1:
+                                    success2 += 1
+                                # elif s2_f == 1:
+                                #     success2_f += 1
 
 
-                file = open(f"output_data/regev/classical_part/file_analysis_2/{dir1_part}_{dir2_part}/N_{N}", "w")
-                file.write(result)
-                file.close()
+                            end = time.time()
+                            exec_time = (end - start) * (10 ** 3)
+                            converted_time = convert_milliseconds(exec_time)
 
-                print(f'Per cent of combinations (with positive values of result vector) that gives % N = 1: {success1 * 100 / number_of_combinations}%')
-                print(f'Per cent of combinations (with positive values of result vector) that give p and q: {success2 * 100 / number_of_combinations}%')
-                # print(f'Percent of combinations (including negative values) that gives % N = 1: {(success1_f + success1) * 100 / number_of_combinations}%')
-                # print(f'Percent of combinations (including negative values) that give p and q: {(success2_f + success2) * 100 / number_of_combinations}%')
-                print(f"Vectors that gives p and q: {p_q_vectors}")
-                print(f"\nexec_time: {exec_time} ms")
-                print(f"exec_time: {converted_time}")
+                            result += (f"Percent of combinations (with positive values of result vector) that gives % N = 1: {success1 * 100 / number_of_combinations}%\n"
+                                       f"Percent of combinations (with positive values of result vector) that give p and q: {success2 * 100 / number_of_combinations}%\n"
+                                       # f"Percent of combinations (including negative values) that gives % N = 1: {(success1_f + success1) * 100 / number_of_combinations}%\n"
+                                       # f"Percent of combinations (including negative values) that give p and q: {(success2_f + success2) * 100 / number_of_combinations}%\n"
+                                       # f"Unsuccessful vectors {unsuccessful_vectors}\n"
+                                       # f"Successful vectors {successful_vectors}\n"
+                                       f"Vectors that gives p and q: {p_q_vectors}\n"
+                                       f"\nexec_time (ms): {exec_time} ms\n"
+                                       f"exec_time: {converted_time}")
 
-                # This code is temporary, needs to be deleted
-                if len(p_q_vectors) > 0:
-                    print(f"CALCULATING P AND Q")
+                            print(f'Per cent of combinations (with positive values of result vector) that gives % N = 1: {success1 * 100 / number_of_combinations}%')
+                            print(f'Per cent of combinations (with positive values of result vector) that give p and q: {success2 * 100 / number_of_combinations}%')
+                            # print(f'Percent of combinations (including negative values) that gives % N = 1: {(success1_f + success1) * 100 / number_of_combinations}%')
+                            # print(f'Percent of combinations (including negative values) that give p and q: {(success2_f + success2) * 100 / number_of_combinations}%')
+                            print(f"Vectors that gives p and q: {p_q_vectors}")
+                            print(f"\nexec_time: {exec_time} ms")
+                            print(f"exec_time: {converted_time}")
 
-                    vector = p_q_vectors[0]
-                    self.get_factors(vector, a_root, N)
+                    if type_of_test == 1:
+                        type_dir = "type_1"
+                    elif type_of_test == 2:
+                        type_dir = "type_2"
+                    elif type_of_test == 3:
+                        type_dir = "type_3"
+
+                    file = open(f"output_data/regev/classical_part/{type_dir}/{dir1_part}_{dir2_part}/N_{N}", "w")
+                    file.write(result)
+                    file.close()
+
+                    # This code is temporary, needs to be deleted
+                    if len(p_q_vectors) > 0:
+                        print(f"CALCULATING P AND Q")
+
+                        vector = p_q_vectors[0]
+                        self.get_factors(vector, a_root, N)
 
 
     def get_vectors(self, N: int, d_ceil=False, qd_ceil=False, semi_classical=False) -> 'RegevResult':
