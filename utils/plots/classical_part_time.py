@@ -20,7 +20,7 @@ time_shor = [0.03266334533691406, 0.026106834411621094, 0.018596649169921875, 0.
              0.017881393432617188, 0.02130866050720215, 0.0162187375520405, 0.014046827952067057]
 
 plt.xlabel("N - factorized number")
-plt.ylabel("time [h]")
+plt.ylabel("time [ms]")
 plt.plot(N[:len(time_ceil_ceil)], time_ceil_ceil, label="Regev's algorithm ceil_ceil")
 plt.plot(N[:len(time_ceil_floor)], time_ceil_floor, label="Regev's algorithm ceil_floor")
 plt.plot(N[:len(time_floor_ceil)], time_floor_ceil, label="Regev's algorithm floor_ceil")
