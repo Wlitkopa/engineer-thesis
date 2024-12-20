@@ -1,10 +1,10 @@
 import matplotlib.pyplot as plt
 import sys
-sys.path.insert(1, './extract_data')
+sys.path.insert(1, '../extract_data')
 from extract_data_from_classical_part import extract_data
 
 
-N = [15, 21, 33, 35, 39, 51, 55, 57]
+N = [15, 21, 33, 35, 39, 51, 55, 57, 65, 69, 77, 85, 91, 95, 119, 143]
 time_ceil_ceil = extract_data("ceil_ceil", 1, len(N))[-1]
 time_ceil_floor = extract_data("ceil_floor", 1, len(N))[-1]
 time_floor_ceil = extract_data("floor_ceil", 1, len(N))[-1]
@@ -17,7 +17,7 @@ time_floor_floor = [i / 1000 for i in time_floor_floor]
 
 # odejmowanie części klasycznej ze względu na zaokrąglenie do ms nie ma sensu
 time_shor = [0.03266334533691406, 0.026106834411621094, 0.018596649169921875, 0.010967254638671875,
-             0.017881393432617188, 0.02130866050720215, 0.0162187375520405, 0.014046827952067057]
+             0.017881393432617188, 0.02130866050720215, 0.0162187375520405, 0.014046827952067057, ]
 
 plt.xlabel("N - factorized number")
 plt.ylabel("time [ms]")
@@ -32,4 +32,4 @@ plt.title("Execution time of classical part")
 plt.subplots_adjust(bottom=0.35)
 plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=1, frameon=False)
 plt.grid(color='gray', linestyle='--', linewidth=0.25)
-plt.savefig("./../../images/plots/classical_part_time.png")
+plt.savefig("./../../../images/plots/time/classical_part_time_whole_range.png")

@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import sys
-sys.path.insert(1, './extract_data')
+sys.path.insert(1, '../extract_data')
 from extract_data_from_classical_part import extract_data
 
 
@@ -29,4 +29,4 @@ plt.title("Comparison of effectiveness")
 plt.subplots_adjust(bottom=0.35)
 plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=1, frameon=False)
 plt.grid(color='gray', linestyle='--', linewidth=0.25)
-plt.savefig("./../../images/plots/effectiveness_floor_1.png")
+plt.savefig("./../../../images/plots/effectiveness/effectiveness_floor_1.png")
