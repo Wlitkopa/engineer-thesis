@@ -26,7 +26,7 @@ plt.plot(N[:len(regev_floor_floor_h)], regev_floor_floor_h, label="Regev's algor
 plt.plot(N[:len(regev_ceil_ceil_h)], regev_ceil_ceil_h, label="Regev's algorithm ceil_ceil")
 plt.plot(N[:len(regev_ceil_floor_h)], regev_ceil_floor_h, label="Regev's algorithm ceil_floor")
 plt.plot(N[:len(shor_h)], shor_h, label="Shor's algorithm")
-plt.title("Quantum computations executing time")
+plt.title("Execution time of quantum part")
 # plt.legend(bbox_to_anchor=(0, 0.92, 1, 0.2), loc="lower left", mode="expand", borderaxespad=0, ncol=3)
 plt.subplots_adjust(bottom=0.25)
 plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=2, frameon=False)
