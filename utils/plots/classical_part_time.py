@@ -4,7 +4,7 @@ sys.path.insert(1, './extract_data')
 from extract_data_from_classical_part import extract_data
 
 
-N = [15, 21, 33, 35, 39, 51, 55, 57]
+N = [15, 21, 33, 35, 39, 51, 55, 57, 65, 69, 77, 85, 91, 95, 119, 143]
 time_ceil_ceil = extract_data("ceil_ceil", 1, len(N))[-1]
 time_ceil_floor = extract_data("ceil_floor", 1, len(N))[-1]
 time_floor_ceil = extract_data("floor_ceil", 1, len(N))[-1]
@@ -27,9 +27,9 @@ plt.plot(N[:len(time_floor_ceil)], time_floor_ceil, label="Regev's algorithm flo
 plt.plot(N[:len(time_floor_floor)], time_floor_floor, label="Regev's algorithm floor_floor")
 plt.plot(N[:len(time_shor)], time_shor, label="Shor's algorithm")
 
-plt.title("Time execution of classical part")
+plt.title("Execution time of classical part")
 # plt.legend(bbox_to_anchor=(0, 0.92, 1, 0.2), loc="lower left", mode="expand", borderaxespad=0, ncol=3)
 plt.subplots_adjust(bottom=0.35)
 plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=1, frameon=False)
 plt.grid(color='gray', linestyle='--', linewidth=0.25)
-plt.savefig("./../../images/plots/classical_part_time.png")
+plt.savefig("./../../images/plots/classical_part_time_whole_range.png")
