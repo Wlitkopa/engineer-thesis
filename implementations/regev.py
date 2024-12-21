@@ -529,7 +529,8 @@ class Regev(ABC):
 
                                 # make LLL algorithm on columns of lattice M
                                 M_LLL = olll.reduction(M.transpose().tolist(), 0.75)
-                                M_LLL_t = np.matrix(M_LLL).transpose().tolist()
+                                M_LLL_t = np.matrix(M_LLL).tolist()
+                                # M_LLL_t = np.matrix(M_LLL).transpose().tolist()
                                 # create flags to count different solutions from lattice once
                                 s1 = 0
                                 s2 = 0
@@ -598,16 +599,16 @@ class Regev(ABC):
                     elif type_of_test == 3:
                         type_dir = "type_3"
 
-                    file = open(f"output_data/regev/classical_part/{type_dir}/{dir1_part}_{dir2_part}/N_{N}", "w")
+                    file = open(f"output_data/regev/classical_part/{type_dir}_columns/{dir1_part}_{dir2_part}/N_{N}", "w")
                     file.write(result)
                     file.close()
 
                     # This code is temporary, needs to be deleted
-                    if len(p_q_vectors) > 0:
-                        print(f"CALCULATING P AND Q")
-
-                        vector = p_q_vectors[0]
-                        self.get_factors(vector, a_root, N)
+                    # if len(p_q_vectors) > 0:
+                    #     print(f"CALCULATING P AND Q")
+                    #
+                    #     vector = p_q_vectors[0]
+                    #     self.get_factors(vector, a_root, N)
 
 
     def get_vectors(self, N: int, d_ceil=False, qd_ceil=False, semi_classical=False) -> 'RegevResult':
