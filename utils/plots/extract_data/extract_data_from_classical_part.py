@@ -6,13 +6,18 @@ def extract_data(parameter, test_type, range_Ns):
     effectiveness_all = []
     effectiveness_nontrivial = []
     time_in_ms = []
-    for filename in os.listdir(f'./../../../output_data/regev/classical_part/type_{test_type}/{parameter}'):
+    for filename in os.listdir(f'./../../../output_data/regev/classical_part/file_analysis_4_all_types/type_{test_type}/{parameter}'):
         Ns.append(int(filename.split('_')[-1]))
-        with open(f'./../../../output_data/regev/classical_part/type_{test_type}/{parameter}/{filename}') as file:
+        with open(f'./../../../output_data/regev/classical_part/file_analysis_4_all_types/type_{test_type}/{parameter}/{filename}') as file:
             content = file.readlines()
-            effectiveness_all.append(float(content[10].split(' ')[-1][:-2]))
-            effectiveness_nontrivial.append(float(content[11].split(' ')[-1][:-2]))
-            time_in_ms.append(int(content[14].split(' ')[-2].split('.')[0]))
+            try:
+                effectiveness_all.append(float(content[10].split(' ')[-1][:-2]))
+                effectiveness_nontrivial.append(float(content[11].split(' ')[-1][:-2]))
+                time_in_ms.append(int(content[14].split(' ')[-2].split('.')[0]))
+            except:
+                effectiveness_all.append(None)
+                effectiveness_nontrivial.append(None)
+                time_in_ms.append(None)
 
     sort_indexes = sorted(range(len(Ns)), key=lambda i: Ns[i])
     Ns = [Ns[i] for i in sort_indexes]
