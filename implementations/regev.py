@@ -492,6 +492,7 @@ class Regev(ABC):
                             n = math.ceil(math.log(N, 2))
                             R = math.ceil(6 * T * math.sqrt((d + 5) * (2 * d + 4) * (d / 2)) * (2 ** ((n + 1) / (d + 4) + d + 2)))
                             t = 1 + math.ceil(math.log(math.sqrt(d) * R, 2))
+                            t = dq
                             delta = math.sqrt(d / 2) / R
                             delta_inv = math.ceil(R / math.sqrt(d / 2))
                             print(f"Parameters:\nN: {N}\nR: {R}\nT: {T}\nt: {t}\ndelta: {delta}\ndelta_inv: {delta_inv}")
