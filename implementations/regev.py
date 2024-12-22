@@ -592,6 +592,8 @@ class Regev(ABC):
                             print(f"\nexec_time: {exec_time} ms")
                             print(f"exec_time: {converted_time}")
 
+                    type_dir = ""
+
                     if type_of_test == 1:
                         type_dir = "type_1"
                     elif type_of_test == 2:
@@ -599,16 +601,16 @@ class Regev(ABC):
                     elif type_of_test == 3:
                         type_dir = "type_3"
 
-                    file = open(f"output_data/regev/classical_part/{type_dir}_columns/{dir1_part}_{dir2_part}/N_{N}", "w")
+                    file = open(f"output_data/regev/classical_part/file_analysis_4_all_types/{type_dir}/{dir1_part}_{dir2_part}/N_{N}", "w")
                     file.write(result)
                     file.close()
 
                     # This code is temporary, needs to be deleted
-                    # if len(p_q_vectors) > 0:
-                    #     print(f"CALCULATING P AND Q")
-                    #
-                    #     vector = p_q_vectors[0]
-                    #     self.get_factors(vector, a_root, N)
+                    if len(p_q_vectors) > 0:
+                        print(f"CALCULATING P AND Q")
+
+                        vector = p_q_vectors[0]
+                        self.get_factors(vector, a_root, N)
 
 
     def get_vectors(self, N: int, d_ceil=False, qd_ceil=False, semi_classical=False) -> 'RegevResult':
