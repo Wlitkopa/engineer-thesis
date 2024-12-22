@@ -240,7 +240,7 @@ class Regev(ABC):
             # get random combinations from vectors
             shuffle(vectors)
             w_d4_d = vectors[:d + 4]
-            # create lattice M with usage created blocks according to Regev algorithm
+
             M = np.block([
                 [I_d, zeros_d_d4],
                 [np.matrix(w_d4_d) * (delta_inv / (2 ** t)), I_d4_d4_delta],
@@ -469,28 +469,28 @@ class Regev(ABC):
 
 
                             # This fragment of code allows to find exact value of T
-                            # T = N
-                            # for p in itertools.product(powers, repeat=d):
-                            #     if p == (0,) * d:
-                            #         # print("UWAGA:", p)
-                            #         continue
-                            #     T_tmp = 1
-                            #     v_len_tmp = 1
-                            #     for i in range(d):
-                            #         T_tmp *= pow(a_root[i], p[i], N)
-                            #         v_len_tmp += pow(p[i], 2)
-                            #     v_len_tmp = math.ceil(math.sqrt(v_len_tmp))
-                            #     # print(p, T_tmp, v_len_tmp)
-                            #     if T_tmp % N == 1 and v_len_tmp < T:
-                            #         # print(a_root)
-                            #         # print(p)
-                            #         # print(v_len_tmp)
-                            #         T = v_len_tmp
+                            T = N
+                            for p in itertools.product(powers, repeat=d):
+                                if p == (0,) * d:
+                                    # print("UWAGA:", p)
+                                    continue
+                                T_tmp = 1
+                                v_len_tmp = 1
+                                for i in range(d):
+                                    T_tmp *= pow(a_root[i], p[i], N)
+                                    v_len_tmp += pow(p[i], 2)
+                                v_len_tmp = math.ceil(math.sqrt(v_len_tmp))
+                                # print(p, T_tmp, v_len_tmp)
+                                if T_tmp % N == 1 and v_len_tmp < T:
+                                    # print(a_root)
+                                    # print(p)
+                                    # print(v_len_tmp)
+                                    T = v_len_tmp
 
                             # This fragment of code estimate the value of T
-                            T = math.ceil(math.exp(n/(2*d)))
-
-                            R = math.ceil(6 * T * math.sqrt((d + 5) * (2 * d) + 4) * (d / 2) * (2 ** ((dq + 1) / (d + 4) + d + 2)))
+                            # T = math.ceil(math.exp(n/(2*d)))
+                            n = math.ceil(math.log(N, 2))
+                            R = math.ceil(6 * T * math.sqrt((d + 5) * (2 * d + 4) * (d / 2)) * (2 ** ((n + 1) / (d + 4) + d + 2)))
                             t = 1 + math.ceil(math.log(math.sqrt(d) * R, 2))
                             delta = math.sqrt(d / 2) / R
                             delta_inv = math.ceil(R / math.sqrt(d / 2))
@@ -521,15 +521,28 @@ class Regev(ABC):
                                 # get random combinations from vectors
                                 shuffle(vectors)
                                 w_d4_d = vectors[:d + 4]
+                                # print("wybrane wektory do tworzenia macierzy:", w_d4_d)
+                                # # create lattice M with usage created blocks according to Regev algorithm
+                                # print('wektory po podzieleniu przez 2^t')
+                                # for i in range(d+4):
+                                #     print(np.array(w_d4_d[i]) / (2 ** t))
+                                # print('wektory po podzieleniu przez 2^t i pomożeniu przez S')
+                                # for i in range(d+4):
+                                #     print(delta_inv * np.array(w_d4_d[i]) / (2 ** t))
                                 # create lattice M with usage created blocks according to Regev algorithm
                                 M = np.block([
                                     [I_d, zeros_d_d4],
                                     [np.matrix(w_d4_d) * (delta_inv / (2 ** t)), I_d4_d4_delta],
                                 ])
+                                np.set_printoptions(precision=6, suppress=True)
+                                # print("stworzona macierz")
+                                # print(M.tolist())
 
                                 # make LLL algorithm on columns of lattice M
                                 M_LLL = olll.reduction(M.transpose().tolist(), 0.75)
                                 M_LLL_t = np.matrix(M_LLL).tolist()
+                                # print("Macirz po LLL")
+                                # print(np.matrix(M_LLL).transpose())
                                 # M_LLL_t = np.matrix(M_LLL).transpose().tolist()
                                 # create flags to count different solutions from lattice once
                                 s1 = 0
@@ -537,7 +550,6 @@ class Regev(ABC):
                                 # s1_f = 0
                                 # s2_f = 0
                                 # check if given combinations of vectors returns correct solution
-
                                 for i in range(0, 2*d + 4):
                                     square = 1
                                     f = 0
@@ -546,29 +558,18 @@ class Regev(ABC):
                                         square *= pow(a_root[j], (M_LLL_t[i][j]), N)
                                         square %= N
                                         temp_vector.append(M_LLL_t[i][j])
-                                        # if M_LLL_t[i][j] < 0:
-                                        #     f = 1
                                     if (square * square) % N == 1 and f == 0 and temp_vector != d*[0]:
                                         s1 = 1
                                         if square != N - 1 and square != 1:
                                             s2 = 1
                                             p_q_vectors.append(temp_vector)
                                             break
-                                    # if (square*square) % N == 1 and f == 1:
-                                    #     s1_f = 1
-                                    #     if square != N-1 and square != 1:
-                                    #         s2_f = 1
 
                                 if s1 == 1:
                                     success1 += 1
-                                # elif s1_f == 1:
-                                #     success1_f += 1
 
                                 if s2 == 1:
                                     success2 += 1
-                                # elif s2_f == 1:
-                                #     success2_f += 1
-
 
                             end = time.time()
                             exec_time = (end - start) * (10 ** 3)
@@ -576,18 +577,12 @@ class Regev(ABC):
 
                             result += (f"Percent of combinations (with positive values of result vector) that gives % N = 1: {success1 * 100 / number_of_combinations}%\n"
                                        f"Percent of combinations (with positive values of result vector) that give p and q: {success2 * 100 / number_of_combinations}%\n"
-                                       # f"Percent of combinations (including negative values) that gives % N = 1: {(success1_f + success1) * 100 / number_of_combinations}%\n"
-                                       # f"Percent of combinations (including negative values) that give p and q: {(success2_f + success2) * 100 / number_of_combinations}%\n"
-                                       # f"Unsuccessful vectors {unsuccessful_vectors}\n"
-                                       # f"Successful vectors {successful_vectors}\n"
                                        f"Vectors that gives p and q: {p_q_vectors}\n"
                                        f"\nexec_time (ms): {exec_time} ms\n"
                                        f"exec_time: {converted_time}")
 
                             print(f'Per cent of combinations (with positive values of result vector) that gives % N = 1: {success1 * 100 / number_of_combinations}%')
                             print(f'Per cent of combinations (with positive values of result vector) that give p and q: {success2 * 100 / number_of_combinations}%')
-                            # print(f'Percent of combinations (including negative values) that gives % N = 1: {(success1_f + success1) * 100 / number_of_combinations}%')
-                            # print(f'Percent of combinations (including negative values) that give p and q: {(success2_f + success2) * 100 / number_of_combinations}%')
                             print(f"Vectors that gives p and q: {p_q_vectors}")
                             print(f"\nexec_time: {exec_time} ms")
                             print(f"exec_time: {converted_time}")
