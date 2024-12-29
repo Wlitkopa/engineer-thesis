@@ -1,6 +1,16 @@
 venv/
 .venv/
 utils/secrets.py
+.gitignore
 
-
-
+/notebooks/
+/tests/
+/implementations/test_T/
+/images/sandbox/
+/output_data/
+/images/plots/
+/.ipynb_checkpoints/
+/gates/beauregard/
+/gates/haner/
+/gates/mix/
+/gates/takahashi/

@@ -13,7 +13,6 @@ for N, a_root in zip([15, 21, 33, 35, 39, 51, 55, 57], [[2,7], [2, 5, 11], [2, 5
         powers.append(i)
     for p in itertools.product(powers, repeat=d):
         if p == (0,) * d:
-            # print("UWAGA:", p)
             continue
         T_tmp = 1
         v_len_tmp = 0

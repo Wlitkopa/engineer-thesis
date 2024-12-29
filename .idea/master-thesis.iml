@@ -6,6 +6,12 @@
       <excludeFolder url="file://$MODULE_DIR$/notebooks/archive/.ipynb_checkpoints" />
       <excludeFolder url="file://$MODULE_DIR$/notebooks/.ipynb_checkpoints" />
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/images/sandbox" />
+      <excludeFolder url="file://$MODULE_DIR$/output_data/regev/classical_part/file_analysis_5_all_types" />
+      <excludeFolder url="file://$MODULE_DIR$/output_data/regev/classical_part/output_register_measuring_N_33_floor_floor" />
+      <excludeFolder url="file://$MODULE_DIR$/output_data/regev/quantum_computer" />
+      <excludeFolder url="file://$MODULE_DIR$/output_data/regev/quantum_part_2" />
+      <excludeFolder url="file://$MODULE_DIR$/output_data/regev/quantum_part_output_reg_meas/ceil_floor" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.11 (shor_mmik)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

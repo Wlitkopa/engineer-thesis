@@ -43,3 +43,4 @@ def _controlled_constant_subtractor(constant: int, n: int) -> Gate:
 def double_controlled_constant_modulo_adder_regs(n: int) -> QRegsSpec:
     spec = double_controlled_comparator_regs(n)
     return {(name if name != 'c' else 'flag'): size for (name, size) in spec.items()}
+
