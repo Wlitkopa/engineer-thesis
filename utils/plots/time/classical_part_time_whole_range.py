@@ -20,16 +20,16 @@ time_shor = [0.03266334533691406, 0.026106834411621094, 0.018596649169921875, 0.
              0.017881393432617188, 0.02130866050720215, 0.0162187375520405, 0.014046827952067057, ]
 
 plt.xlabel("N - factorized number")
-plt.ylabel("time [ms]")
+plt.ylabel("runtime [ms]")
 plt.plot(N[:len(time_ceil_ceil)], time_ceil_ceil, label="Regev's algorithm ceil_ceil")
 plt.plot(N[:len(time_ceil_floor)], time_ceil_floor, label="Regev's algorithm ceil_floor")
 plt.plot(N[:len(time_floor_ceil)], time_floor_ceil, label="Regev's algorithm floor_ceil")
 plt.plot(N[:len(time_floor_floor)], time_floor_floor, label="Regev's algorithm floor_floor")
 plt.plot(N[:len(time_shor)], time_shor, label="Shor's algorithm")
 
-plt.title("Execution time of classical part")
+plt.title("Execution runtime of classical part")
 # plt.legend(bbox_to_anchor=(0, 0.92, 1, 0.2), loc="lower left", mode="expand", borderaxespad=0, ncol=3)
 plt.subplots_adjust(bottom=0.35)
 plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=1, frameon=False)
 plt.grid(color='gray', linestyle='--', linewidth=0.25)
-plt.savefig("./../../../images/plots/time/classical_part_time_whole_range.png")
+plt.savefig("./../../../images/plots/runtime/classical_part_time_whole_range.png")

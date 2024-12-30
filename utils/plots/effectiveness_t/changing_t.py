@@ -49,4 +49,4 @@ for t in t_list:
     plt.subplots_adjust(bottom=0.3)
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=1, frameon=False)
     plt.grid(color='gray', linestyle='--', linewidth=0.25)
-    plt.savefig(f"./../../../images/plots/changing_t/effectiveness_t_{t}.png")
+    plt.savefig(f"./../../../images/plots/effectiveness_t/effectiveness_t_{t}.png")

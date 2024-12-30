@@ -6,9 +6,9 @@ def extract_data(parameter, test_type, range_Ns):
     effectiveness_all = []
     effectiveness_nontrivial = []
     time_in_ms = []
-    for filename in os.listdir(f'./../../../output_data/regev/classical_part/file_analysis_4_all_types/type_{test_type}/{parameter}'):
+    for filename in os.listdir(f'./../../../output_data/regev/classical_part/type_{test_type}/{parameter}'):
         Ns.append(int(filename.split('_')[-1]))
-        with open(f'./../../../output_data/regev/classical_part/file_analysis_4_all_types/type_{test_type}/{parameter}/{filename}') as file:
+        with open(f'./../../../output_data/regev/classical_part/type_{test_type}/{parameter}/{filename}') as file:
             content = file.readlines()
             try:
                 effectiveness_all.append(float(content[10].split(' ')[-1][:-2]))
