@@ -10,6 +10,7 @@ from implementations.r_haner import HanerRegev as Regev
 # d_qd_list = [[True, True], [True, False], [False, True], [False, False]]
 # type_of_test_array = [1, 2, 3]
 
+
 # Initiating Regev algorithm class
 shots_num = 128
 regev = Regev(shots_num)
@@ -31,6 +32,35 @@ type_of_test_array = [1, 2, 3]
 
 # Parameter indicating if a trivial final part of finding p and q should be run (for running 'all parts')
 find_pq = True
+
+# Parameter denoting if a decomposed version of quantum circuit should be drawn (drawing quantum circuit)
+decompose = False
+
+
+while True:
+    print("========== REGEV'S ALGORITHM ==========\n")
+
+    print('''Choose an option:
+    1. Run all algorithm
+    2. Run quantum part
+    3. Run classical part
+    4. Draw quantum circuit
+    5. Exit''')
+
+    while True:
+        try:
+            choice = int(input())
+            break
+        except ValueError:
+            print("Please enter a number.")
+            continue
+
+    match choice:
+        case 1:
+            print("------- Running all algorithm -------")
+            regev.run_all_algorithm(Ns, d_qd_list, number_of_combinations, type_of_test, find_pq)
+            print("Finished running all algorithm. The results are saved in output_data/regev/all_parts folder")
+            continue
 
 # Parameter denoting if a decomposed version of quantum circuit should be drawn (drawing quantum circuit)
 decompose = False
@@ -85,3 +115,4 @@ while True:
 
         case _:
             print("Invalid choice.")
+

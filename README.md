@@ -36,12 +36,6 @@ To run the Regev's algorithm, execute the following script:
 python regev_all.py
 ```
 
-## Acknowledgement
-
-This project uses code provided by **Bartłomiej Stępień**, licensed under the Apache License 2.0 avilable
-at https://github.com/bartek-bartlomiej/master-thesis.
-
-Copyright (c) 2023 Bartłomiej Stępień
 
 ## Images and data
 
@@ -63,6 +57,13 @@ The data obtained from running Shor's and Regev's algorithms is stored in the fo
 Graphs representing the research data depending on various parameters are stored in the folder:
 
 - **images/plots**
+
+## Acknowledgement
+
+This project uses code provided by **Bartłomiej Stępień**, licensed under the Apache License 2.0 avilable
+at https://github.com/bartek-bartlomiej/master-thesis.
+
+Copyright (c) 2023 Bartłomiej Stępień
 
 ## License
 
