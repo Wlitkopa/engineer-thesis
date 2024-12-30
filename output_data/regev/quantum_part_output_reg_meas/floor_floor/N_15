@@ -1,0 +1,17 @@
+N: 15
+n: 4
+d_ceil: False
+qd_ceil: False
+number_of_primes (d): 2
+exp_register_width (qd): 4
+squared_primes: [4, 49]
+output_data: [[[8, 8, 4], '1000 1000 0100', 19], [[0, 0, 4], '0000 0000 0100', 32], [[0, 0, 1], '0000 0000 0001', 36], [[8, 8, 1], '1000 1000 0001', 41]]
+
+vectors: 
+vector with 19 shots: [8, 8, 4],
+vector with 32 shots: [0, 0, 4],
+vector with 36 shots: [0, 0, 1],
+vector with 41 shots: [8, 8, 1],
+
+exec_time (ms): 9237.39218711853 ms
+exec_time: 9s 237.39218711853027ms

@@ -78,9 +78,9 @@ class Regev(ABC):
                 circuit = self.construct_circuit(N, d_ceil_bool, qd_ceil_bool)
 
                 if decompose:
-                    circuit.decompose().draw(output='mpl', filename=f'images/decomposed/{d_mode}_{qd_mode}/N_{N}.png', style='iqp-dark', fold=-1)
+                    circuit.decompose().draw(output='mpl', filename=f'images/sandbox/{d_mode}_{qd_mode}/N_{N}.png', style='iqp-dark', fold=-1)
                 else:
-                    circuit.draw(output='mpl', filename=f'images/general/{d_mode}_{qd_mode}/N_{N}.png', style='iqp-dark', fold=-1)
+                    circuit.draw(output='mpl', filename=f'images/sandbox/{d_mode}_{qd_mode}/N_{N}.png', style='iqp-dark', fold=-1)
 
 
     def run_all_algorithm(self, Ns, d_qd_list, number_of_combinations, type_of_test, find_pq=False):
@@ -349,7 +349,7 @@ class Regev(ABC):
                 else:
                     qd_mode = "floor"
 
-                file = open(f"output_data/regev/quantum_part_2/{d_mode}_{qd_mode}/N_{N}", "w")
+                file = open(f"output_data/regev/quantum_part_output_reg_meas/{d_mode}_{qd_mode}/N_{N}", "w")
                 file.write(result_str)
                 file.close()
 
@@ -492,7 +492,7 @@ class Regev(ABC):
                             n = math.ceil(math.log(N, 2))
                             R = math.ceil(6 * T * math.sqrt((d + 5) * (2 * d + 4) * (d / 2)) * (2 ** ((n + 1) / (d + 4) + d + 2)))
                             t = 1 + math.ceil(math.log(math.sqrt(d) * R, 2))
-                            t = dq
+                            t = d
                             delta = math.sqrt(d / 2) / R
                             delta_inv = math.ceil(R / math.sqrt(d / 2))
                             print(f"Parameters:\nN: {N}\nR: {R}\nT: {T}\nt: {t}\ndelta: {delta}\ndelta_inv: {delta_inv}")
@@ -597,7 +597,7 @@ class Regev(ABC):
                     elif type_of_test == 3:
                         type_dir = "type_3"
 
-                    file = open(f"output_data/regev/classical_part/file_analysis_4_all_types/{type_dir}/{dir1_part}_{dir2_part}/N_{N}", "w")
+                    file = open(f"output_data/regev/classical_part/file_analysis_5_all_types/{type_dir}/{dir1_part}_{dir2_part}/N_{N}", "w")
                     file.write(result)
                     file.close()
 
@@ -789,6 +789,13 @@ class Regev(ABC):
                 modular_exponentiation_gate,
                 qubits_to_pass
             )
+
+
+        # # TEMPORARY CODE: OUTPUT REGISTER MEASURING
+        # y_creg = ClassicalRegister(n, 'yValue')
+        # circuit.add_register(y_creg)
+        # circuit.measure(qregs_all[-2], y_creg)
+
 
         qft = QFT(qd).to_gate()
 

@@ -15,6 +15,7 @@ def modular_exponentiation_gate(constant: int, N: int, n: int, qd: int) -> Gate:
     for i in range(qd):
         partial_constant = get_partial_constant(constant, i, N)
         circuit.append(
+
             controlled_modular_multiplication_gate(partial_constant, N, n),
             list(chain([x_qreg[i]], y_qreg, aux_qreg))
         )
