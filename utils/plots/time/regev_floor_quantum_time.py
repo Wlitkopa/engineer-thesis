@@ -16,13 +16,13 @@ shor_time_ms_all = [17820, 67915, 1083631, 1097304, 1118240, 1087438, 1151647, 1
 shor_h = [i / 3600000 for i in shor_time_ms_all]
 
 plt.xlabel("N - factorized number")
-plt.ylabel("time [h]")
+plt.ylabel("runtime [h]")
 plt.plot(N[:len(regev_floor_ceil_h)], regev_floor_ceil_h, label="Regev's algorithm floor_ceil")
 plt.plot(N[:len(regev_floor_floor_h)], regev_floor_floor_h, label="Regev's algorithm floor_floor")
 plt.plot(N[:len(shor_h)], shor_h, label="Shor's algorithm")
-plt.title("Execution time of quantum part")
+plt.title("Execution runtime of quantum part")
 # plt.legend(bbox_to_anchor=(0, 0.92, 1, 0.2), loc="lower left", mode="expand", borderaxespad=0, ncol=3)
 plt.subplots_adjust(bottom=0.25)
 plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=2, frameon=False)
 plt.grid(color='gray', linestyle='--', linewidth=0.25)
-plt.savefig("./../../../images/plots/time/regev_floor_quantum_time.png")
+plt.savefig("./../../../images/plots/runtime/regev_floor_quantum_time.png")

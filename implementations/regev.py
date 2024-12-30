@@ -155,7 +155,7 @@ class Regev(ABC):
     def run_classical_part(self, number_of_combinations, N, n, d, qd, a, output_data, type_of_test, find_pq=False):
 
         print("Running classical part")
-        # start = time.time()
+        # start = runtime.runtime()
         classic_result = RegevResult()
         vectors = []
         p_q_vectors = []

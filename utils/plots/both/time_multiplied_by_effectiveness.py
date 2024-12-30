@@ -34,14 +34,14 @@ m_regev_floor_floor = [t * e for t, e in zip(regev_floor_floor_s, factorize_effe
 m_shor = [t * e for t, e in zip(shor_s, shor_effectiveness)]
 
 plt.xlabel("N - factorized number")
-plt.ylabel("effectiveness * quantum time execution [% * s]")
+plt.ylabel("effectiveness * quantum runtime execution [% * s]")
 plt.plot(N[:len(N)], m_regev_ceil_ceil, label="Regev's algorithm ceil_ceil")
 plt.plot(N[:len(N)], m_regev_floor_ceil, label="Regev's algorithm ceil_floor")
 plt.plot(N[:len(N)], m_regev_ceil_floor, label="Regev's algorithm floor_ceil")
 plt.plot(N[:len(N)], m_regev_floor_floor, label="Regev's algorithm floor_floor")
 plt.plot(N[:len(N)], m_shor, label="Shor's algorithm")
 
-plt.title("Comparison of effectiveness-time metric")
+plt.title("Comparison of effectiveness-runtime metric")
 # plt.legend(bbox_to_anchor=(0, 0.92, 1, 0.2), loc="lower left", mode="expand", borderaxespad=0, ncol=3)
 plt.subplots_adjust(bottom=0.35)
 plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=1, frameon=False)
