@@ -25,15 +25,12 @@ from decimal import Decimal, getcontext
 import time
 # from utils.secrets import ibm_api_token
 
-
-# Importy z data_analizer.py
 import os
 import ast
 import math
 import olll
 import itertools
 import numpy as np
-
 
 from qiskit.providers import  Backend
 from qiskit_aer import AerSimulator
@@ -154,8 +151,8 @@ class Regev(ABC):
 
     def run_classical_part(self, number_of_combinations, N, n, d, qd, a, output_data, type_of_test, find_pq=False):
 
-        print("Running classical part")
-        # start = runtime.runtime()
+        print("running classical part")
+
         classic_result = RegevResult()
         vectors = []
         p_q_vectors = []
@@ -166,7 +163,6 @@ class Regev(ABC):
         for a_ in a:
             a_root.append(int(math.sqrt(a_)))
 
-        # output_data[i]: [Vector, measurments, shots]
         total_number_of_vectors = 0
         for i in range(len(output_data)):
             duplicate = output_data[i][2]
@@ -198,7 +194,6 @@ class Regev(ABC):
 
         for p in itertools.product(powers, repeat=d):
             if p == (0,) * d:
-                # print("UWAGA:", p)
                 continue
             T_tmp = 1
             v_len_tmp = 1
@@ -206,14 +201,9 @@ class Regev(ABC):
                 T_tmp *= pow(a_root[i], p[i], N)
                 v_len_tmp += pow(p[i], 2)
             v_len_tmp = math.ceil(math.sqrt(v_len_tmp))
-            # print(p, T_tmp, v_len_tmp)
             if T_tmp % N == 1 and v_len_tmp < T:
-                # print(a_root)
-                # print(p)
-                # print(v_len_tmp)
                 T = v_len_tmp
 
-        # print('T', T)
         R = math.ceil(6 * T * math.sqrt((d + 5) * (2 * d) + 4) * (d / 2) * (2 ** ((qd + 1) / (d + 4) + d + 2)))
         t = 1 + math.ceil(math.log(math.sqrt(d) * R, 2))
         delta = math.sqrt(d / 2) / R
@@ -233,8 +223,6 @@ class Regev(ABC):
 
         success1 = 0
         success2 = 0
-        # success1_f = 0
-        # success2_f = 0
 
         for _ in range(number_of_combinations):
             # get random combinations from vectors
@@ -253,8 +241,6 @@ class Regev(ABC):
             # create flags to count different solutions from lattice once
             s1 = 0
             s2 = 0
-            # s1_f = 0
-            # s2_f = 0
             # check if given combinations of vectors returns correct solution
 
             break_flag = 0
@@ -266,32 +252,21 @@ class Regev(ABC):
                     square *= pow(a_root[j], (M_LLL_t[i][j]), N)
                     square %= N
                     temp_vector.append(M_LLL_t[i][j])
-                    # if M_LLL_t[i][j] < 0:
-                    #     f = 1
                 if (square * square) % N == 1 and f == 0:
                     s1 = 1
                     if square != N - 1 and square != 1:
                         s2 = 1
-                        # TODO: wyjść na dobre z tych pętli tak, żeby od razu iść zwrócić wektor (lub też wyliczyć p i q jeżeli find_pq=True)
                         p_q_vectors.append(temp_vector)
                         break_flag = 1
                         break
                 if break_flag == 1:
                     break
-                # if (square*square) % N == 1 and f == 1:
-                #     s1_f = 1
-                #     if square != N-1 and square != 1:
-                #         s2_f = 1
 
             if s1 == 1:
                 success1 += 1
-            # elif s1_f == 1:
-            #     success1_f += 1
 
             if s2 == 1:
                 success2 += 1
-            # elif s2_f == 1:
-            #     success2_f += 1
 
         end = time.time()
         exec_time = (end - start) * (10 ** 3)
@@ -412,8 +387,6 @@ class Regev(ABC):
                     dir1_part = file_name.split("/")[-2].split("_")[0]
                     dir2_part = file_name.split("/")[-2].split("_")[1]
 
-                    print(f"dir1_part: {dir1_part}\ndir2_part: {dir2_part}")
-
                     with open(file_name) as results:
 
                         # read parameters from input file
@@ -442,7 +415,6 @@ class Regev(ABC):
                             if type_of_test == 1:
                                 for i in range(duplicate):
                                     vectors.append(ast.literal_eval(v))
-                                    # print(f"ast.literal_eval(v): {ast.literal_eval(v)}")
                             if type_of_test == 2:
                                 vectors.append(ast.literal_eval(v))
                             if type_of_test == 3:
@@ -456,7 +428,6 @@ class Regev(ABC):
                         if type_of_test == 2 and len(vectors) < d+4:
                             result += f"\nToo little variety of vectors for number {N}\n"
                             print(f"\nToo little variety of vectors for number {N}\n")
-                            # continue
 
                         else:
                             start = time.time()
@@ -469,30 +440,24 @@ class Regev(ABC):
 
 
                             # This fragment of code allows to find exact value of T
-                            T = N
-                            for p in itertools.product(powers, repeat=d):
-                                if p == (0,) * d:
-                                    # print("UWAGA:", p)
-                                    continue
-                                T_tmp = 1
-                                v_len_tmp = 1
-                                for i in range(d):
-                                    T_tmp *= pow(a_root[i], p[i], N)
-                                    v_len_tmp += pow(p[i], 2)
-                                v_len_tmp = math.ceil(math.sqrt(v_len_tmp))
-                                # print(p, T_tmp, v_len_tmp)
-                                if T_tmp % N == 1 and v_len_tmp < T:
-                                    # print(a_root)
-                                    # print(p)
-                                    # print(v_len_tmp)
-                                    T = v_len_tmp
+                            # T = N
+                            # for p in itertools.product(powers, repeat=d):
+                            #     if p == (0,) * d:
+                            #         continue
+                            #     T_tmp = 1
+                            #     v_len_tmp = 1
+                            #     for i in range(d):
+                            #         T_tmp *= pow(a_root[i], p[i], N)
+                            #         v_len_tmp += pow(p[i], 2)
+                            #     v_len_tmp = math.ceil(math.sqrt(v_len_tmp))
+                            #     if T_tmp % N == 1 and v_len_tmp < T:
+                            #         T = v_len_tmp
 
                             # This fragment of code estimate the value of T
-                            # T = math.ceil(math.exp(n/(2*d)))
+                            T = math.ceil(math.exp(n/(2*d)))
                             n = math.ceil(math.log(N, 2))
                             R = math.ceil(6 * T * math.sqrt((d + 5) * (2 * d + 4) * (d / 2)) * (2 ** ((n + 1) / (d + 4) + d + 2)))
                             t = 1 + math.ceil(math.log(math.sqrt(d) * R, 2))
-                            t = d
                             delta = math.sqrt(d / 2) / R
                             delta_inv = math.ceil(R / math.sqrt(d / 2))
                             print(f"Parameters:\nN: {N}\nR: {R}\nT: {T}\nt: {t}\ndelta: {delta}\ndelta_inv: {delta_inv}")
@@ -515,41 +480,26 @@ class Regev(ABC):
 
                             success1 = 0
                             success2 = 0
-                            # success1_f = 0
-                            # success2_f = 0
 
                             for _ in range(number_of_combinations):
                                 # get random combinations from vectors
                                 shuffle(vectors)
                                 w_d4_d = vectors[:d + 4]
-                                # print("wybrane wektory do tworzenia macierzy:", w_d4_d)
-                                # # create lattice M with usage created blocks according to Regev algorithm
-                                # print('wektory po podzieleniu przez 2^t')
-                                # for i in range(d+4):
-                                #     print(np.array(w_d4_d[i]) / (2 ** t))
-                                # print('wektory po podzieleniu przez 2^t i pomożeniu przez S')
-                                # for i in range(d+4):
-                                #     print(delta_inv * np.array(w_d4_d[i]) / (2 ** t))
                                 # create lattice M with usage created blocks according to Regev algorithm
                                 M = np.block([
                                     [I_d, zeros_d_d4],
                                     [np.matrix(w_d4_d) * (delta_inv / (2 ** t)), I_d4_d4_delta],
                                 ])
                                 np.set_printoptions(precision=6, suppress=True)
-                                # print("stworzona macierz")
-                                # print(M.tolist())
 
                                 # make LLL algorithm on columns of lattice M
                                 M_LLL = olll.reduction(M.transpose().tolist(), 0.75)
                                 M_LLL_t = np.matrix(M_LLL).tolist()
-                                # print("Macirz po LLL")
-                                # print(np.matrix(M_LLL).transpose())
-                                # M_LLL_t = np.matrix(M_LLL).transpose().tolist()
+
                                 # create flags to count different solutions from lattice once
                                 s1 = 0
                                 s2 = 0
-                                # s1_f = 0
-                                # s2_f = 0
+
                                 # check if given combinations of vectors returns correct solution
                                 for i in range(0, 2*d + 4):
                                     square = 1
@@ -619,40 +569,21 @@ class Regev(ABC):
         circuit = self.construct_circuit(N, d_ceil, qd_ceil, semi_classical, measurement=True)
         # aersim = AerSimulator(method="extended_stabilizer")
         aersim = AerSimulator()
-        # Wyświetlenie liczby obsługiwanych kubitów
+
+        # Display a number of operated qubits
         print("Max number of qubits (local qasm_simulator):", aersim.configuration().n_qubits)
-        # print("Max circuits: ", aersim.max_circuits)
-        # print("available_methods(): ", aersim.available_methods())
-        # print("available_devices(): ", aersim.available_devices())
-        #
-        # print("configuration(): ", aersim.configuration())
-        # print("name: ", aersim.name)
-        # print("")
 
-
-        # pm = generate_preset_pass_manager(backend=aersim, optimization_level=3  )
         pm = transpile(circuit, aersim)
 
-        # isa_qc = pm.run(circuit)
         counts = aersim.run(pm, shots=self.shots).result().get_counts(0)
 
-        # counts = aersim.run(isa_qc, shots=self.shots).result().get_counts(0)
-
-        # counts = aersim.run(isa_qc, shots=self.shots).result().get_counts(0)
-        # counts = result.get_counts(0)
-        # print('Counts(ideal):', counts)
-
-        # counts=self.sampler().run(circuit, shots=self.shots).result().quasi_dists[0].binary_probabilities()
 
         self.result.total_counts = len(counts)
         self.result.total_shots = self.shots
-        # print(f"counts.items(): {counts.items()}")
 
         sorted_counts_items = sorted(counts.items(), key=lambda x: x[1])
 
         for measurement, shots in sorted_counts_items:
-            # measurement = self._parse_measurement(measurement, semi_classical)
-            # print(f", measurment: {measurement}   |   shots: {shots}", end="")
             vector = convert_measurement(measurement)
             self.result.output_data.append([vector, measurement, shots])
 
@@ -732,14 +663,6 @@ class Regev(ABC):
     def _construct_circuit(self, N: int, n: int, measurement: bool, d: int, qd: int) -> QuantumCircuit:
 
 
-        # CZĘŚĆ BARTKA (utworzenie rejestrów)
-        # x_qreg = QuantumRegister(2 * n, 'x')
-        # y_qreg = QuantumRegister(n, 'y')
-        # aux_qreg = AncillaRegister(self._get_aux_register_size(n), 'aux')
-        # circuit = QuantumCircuit(x_qreg, y_qreg, aux_qreg, name=self._get_name(N, d))
-
-        # CZĘŚĆ NiP (utworzenie rejestrów)
-
         x_qregs_spec = dict()
         a = self.generate_a(d, N)
 
@@ -759,30 +682,18 @@ class Regev(ABC):
         for qreg in x_qregs:
             circuit.h(qreg)
 
-        # Poniższa linijka była w kodzie Bartka, może się wiązać z jakimś bitem kontrolnym albo mnożeniem
         circuit.x(y_qreg[0])
 
-        # Debugging
-        # print(f"a: {a}\n\n")
         self.result.squared_primes = a
-        # print(f"circuit.qubits: {circuit.qubits}")
-
-        # for qubit in circuit.qubits:
-        #     print(f"qubit: {qubit._repr}\nregister: {qubit._register}\nregister_name: {qubit._register._name}")
-        # Koniec debuggingu
 
         x_regs_cubits = []
-        # for qubit in circuit.qubits:
         qregs_all = circuit.qregs
-        # print(f"\n\nqregs_all: {qregs_all}")
-        # print(f"qregs_all[0].qubits: {qregs_all[0]._bits}")
 
         for i in range(d):
             qubits_to_pass = []
             qubits_to_pass += qregs_all[i]
             qubits_to_pass += qregs_all[-2]
             qubits_to_pass += qregs_all[-1]
-            # print(f"\nqubits_to_pass: {qubits_to_pass}\na_to_pass: {a[i]}\n")
 
             modular_exponentiation_gate = self._modular_exponentiation_gate(a[i], N, n, qd)
             circuit.append(
@@ -791,14 +702,12 @@ class Regev(ABC):
             )
 
 
-        # # TEMPORARY CODE: OUTPUT REGISTER MEASURING
+        # Output register measuring
         # y_creg = ClassicalRegister(n, 'yValue')
         # circuit.add_register(y_creg)
         # circuit.measure(qregs_all[-2], y_creg)
 
-
         qft = QFT(qd).to_gate()
-
 
         for i in range(d):
             circuit.append(
@@ -811,9 +720,6 @@ class Regev(ABC):
                 x_creg = ClassicalRegister(qd, name=f'x{i+1}Value')
                 circuit.add_register(x_creg)
                 circuit.measure(qregs_all[i], x_creg)
-            # y_creg = ClassicalRegister(n, 'yValue')
-            # circuit.add_register(y_creg)
-            # circuit.measure(qregs_all[-2], y_creg)
 
         return circuit
 
@@ -821,26 +727,16 @@ class Regev(ABC):
     @staticmethod
     def get_factors(vect, primes, N):
 
-        print(f"squared_primes = {primes}\n"
-              f"vect: {vect}\n")
+        print("Calculating p and q")
 
-        # prod = Decimal(1)
         prod = 1
 
         for i in range(len(primes)):
-            # sqrt_a = Decimal(primes[i]).sqrt()
-            # pow_a = ((Decimal(primes[i]) ** vect[i]) % N)
-            # pow_a = pow(Decimal(primes[i]), vect[i], N)
-            # prod = ((prod*pow_a) % N)
             prod *= pow(primes[i], (vect[i]), N)
             prod %= N
 
-        print(f"prod: {prod}")
-        # prod = (prod % Decimal(N))
-
         val1 = (prod - 1)
         val2 = (prod + 1)
-        print(f"val1: {val1}\nval2: {val2}\nN: {N}")
 
         p = math.gcd(int(val2), N)
 
@@ -852,9 +748,7 @@ class Regev(ABC):
             return -1
 
         q = int(N/p)
-
         print(f"p: {p}\nq: {q}")
-
         return p, q
 
 
@@ -869,9 +763,9 @@ class Regev(ABC):
         circuit = self.construct_circuit(N, d_ceil, qd_ceil, semi_classical, measurement=True)
         print(circuit)
         print(f"Number of qubits: {circuit.num_qubits}")
-
         print(f"Number of classical bits: {circuit.num_clbits}")
         print(f'Backend name: {backend.name}')
+
         pm = generate_preset_pass_manager(backend=backend, optimization_level=0)
         isa_circuit = pm.run(circuit)
         print(isa_circuit)

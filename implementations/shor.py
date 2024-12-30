@@ -105,7 +105,6 @@ class Shor(ABC):
 
         result.classical_milliseconds = result.classical_milliseconds / result.total_counts
         result.all_orders = all_orders
-        print(f"Factors: {self._get_factors(result.order, a, N)}")
         return result
 
     def construct_circuit(self, a: int, N: int, semi_classical: bool = False, measurement: bool = True):
