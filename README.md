@@ -36,6 +36,13 @@ To run the Regev's algorithm, execute the following script:
 python regev_all.py
 ```
 
+## Acknowledgement
+
+This project uses code provided by **Bartłomiej Stępień**, licensed under the Apache License 2.0 avilable
+at https://github.com/bartek-bartlomiej/master-thesis.
+
+Copyright (c) 2023 Bartłomiej Stępień
+
 ## Images and data
 
 ### Quantum Circuits
@@ -56,3 +63,15 @@ The data obtained from running Shor's and Regev's algorithms is stored in the fo
 Graphs representing the research data depending on various parameters are stored in the folder:
 
 - **images/plots**
+
+## License
+
+Copyright (c) 2024 Natalia Moćko, Przemysław Pawlitko
+
+Licensed under the Apache License, Version 2.0 (the "License"); 
+you may not use this file except in compliance with the License. 
+You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on 
+an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+specific language governing permissions and limitations under the License.
