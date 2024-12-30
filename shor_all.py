@@ -23,7 +23,6 @@ for i in range(len(Ns)):
         if not isMillerRabinPassed(prime_candidate) or prime_candidate > N or N % prime_candidate == 0:
             continue
         else:
-            # print(n, "bit prime is: ", prime_candidate)
             a = prime_candidate
             break
 
@@ -43,11 +42,7 @@ for i in range(len(Ns)):
     shor = Shor(shots=128)
     circuit = shor.construct_circuit(a, N, semi_classical=False, measurement=True)
     # circuit.draw(output='mpl', fold=-1)
-    # result = shor.get_order(a, N, semi_classical=False)
-
-    # Alternative version
     result = shor.get_order(a, N, semi_classical=False)
-
 
     end = time.time()
     exec_time = (end-start)*(10**3)
@@ -81,7 +76,4 @@ for i in range(len(Ns)):
     file.write(result_str)
     file.close()
 
-
     print(result_str)
-
-
