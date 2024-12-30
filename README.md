@@ -38,7 +38,7 @@ python regev_all.py
 
 ## Acknowledgement
 
-This project uses code provided by **Bartłomiej Stępień**, licensed under the Apache License 2.0 avilable on 
+This project uses code provided by **Bartłomiej Stępień**, licensed under the Apache License 2.0 avilable
 at https://github.com/bartek-bartlomiej/master-thesis.
 
 Copyright (c) 2023 Bartłomiej Stępień
